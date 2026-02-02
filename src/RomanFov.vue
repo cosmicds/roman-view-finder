@@ -46,6 +46,16 @@
         </icon-button>
       </div>
       <div id="center-buttons">
+        <v-select
+          id="bg-select"
+          width="200"
+          v-model="backgroundImagesetName"
+          label="Select Background"
+          :items="backgroundImagesets"
+          item-title="displayName"
+          item-value="imagesetName"
+        >
+        </v-select>
       </div>
       <div id="right-buttons">
       </div>
@@ -206,8 +216,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
-import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
+import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
+import { storeToRefs } from "pinia";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -217,6 +228,17 @@ export interface RomanFovProps {
 }
 
 const store = engineStore();
+
+const { backgroundImageset } = storeToRefs(store);
+
+const backgroundImagesetName = computed({
+  get(): string | undefined {
+    return backgroundImageset.value?.get_name();
+  },
+  set(name: string) {
+    store.setBackgroundImageByName(name);
+  }
+});
 
 useWWTKeyboardControls(store);
 
@@ -234,7 +256,13 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
   }
 });
 
-const backgroundImagesets = reactive<BackgroundImageset[]>([]);
+
+        
+const backgroundImagesets = reactive<BackgroundImageset[]>([
+  new BackgroundImageset("DSS", "Digitized Sky Survey (Color)"),
+  new BackgroundImageset("2MASS", "2Mass: Imagery (Infrared)"),
+  new BackgroundImageset("SDSS", "SDSS: Sloan Digital Sky Survey (Optical) [DR7]"),
+]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
@@ -244,7 +272,10 @@ const tab = ref(0);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
-    skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
+    await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
+      backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands")); 
+    });
+    console.log(backgroundImagesets);
     store.gotoRADecZoom({
       ...props.initialCameraParams,
       instant: true
@@ -609,6 +640,14 @@ video {
   // (around 400px or less)
   .v-tabs:not(.v-tabs--vertical).v-tabs--right>.v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__next, .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right)>.v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__prev {
     display: none;
+  }
+}
+
+#bg-select {
+  pointer-events: auto;
+
+  &:hover {
+    cursor: pointer;
   }
 }
 </style>
