@@ -10,41 +10,6 @@
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
 
-
-    <!-- This contains the splash screen content -->
-
-    <v-overlay
-      :model-value="showSplashScreen"
-      absolute
-      opacity="0.6"
-      :style="cssVars"
-      id="splash-overlay"
-    >
-      <div
-        id="splash-screen"
-        v-click-outside="closeSplashScreen"
-        :style="cssVars"
-      >
-        <font-awesome-icon
-          id="close-splash-button"
-          @click="closeSplashScreen"
-          @keyup.enter="closeSplashScreen"
-          icon="xmark"
-          tabindex="0"
-        />
-        <div id="splash-screen-text">
-          <p>Splash Screen Content</p>
-        </div>
-        <div id="splash-screen-acknowledgements" class="small">
-          This Data Story is brought to you by <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
-          
-          <div id="splash-screen-logos">
-            <credit-logos logo-size="5vmin"/>
-          </div>
-        </div>
-      </div>
-    </v-overlay>
-
     <transition name="fade">
       <div
         class="modal"
@@ -269,8 +234,6 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
   }
 });
 
-const splash = new URLSearchParams(window.location.search).get("splash")?.toLowerCase() !== "false";
-const showSplashScreen = ref(splash);
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
@@ -350,14 +313,6 @@ const showVideoSheet = computed({
     }
   }
 });
-
-/**
-  This is convenient if there's any other logic that we want to run
-  when the splash screen is closed
-*/
-function closeSplashScreen() {
-  showSplashScreen.value = false;
-}
 
 function selectSheet(sheetType: SheetType | null) {
   if (sheet.value === sheetType) {
@@ -514,66 +469,6 @@ body {
   pointer-events: none;
   align-items: center;
   gap: 5px;
-}
-
-#splash-overlay {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-#splash-screen {
-  color: #FFFFFF;
-  background-color: #000000;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-around;
-
-  font-family: 'Highway Gothic Narrow', 'Roboto', sans-serif;
-  font-size: min(8vw, 7vh);
-
-  border-radius: 10%;
-  border: min(1.2vw, 0.9vh) solid var(--accent-color);
-  overflow: auto;
-  padding-top: 4rem;
-  padding-bottom: 1rem;
-
-  @media (max-width: 699px) {
-    max-height: 80vh;
-    max-width: 90vw;
-  }
-
-  @media (min-width: 700px) {
-    max-height: 85vh;
-    max-width: min(70vw, 800px);
-  }
-
-  div {
-    margin-inline: auto;
-    text-align: center;
-  }
-
-  .small {
-    font-size: var(--default-font-size);
-    font-weight: bold;
-  }
-
-  #close-splash-button {
-    position: absolute;
-    top: 0.5rem;
-    right: 1.75rem;
-    text-align: end;
-    color: var(--accent-color);
-    font-size: min(8vw, 5vh);
-
-    &:hover {
-      cursor: pointer;
-    }
-  }
 }
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
