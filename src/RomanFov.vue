@@ -259,8 +259,6 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
     };
   }
 });
-
-
         
 const backgroundImagesets = reactive<BackgroundImageset[]>([
   new BackgroundImageset("DSS", "Digitized Sky Survey (Color)"),
@@ -278,10 +276,12 @@ onMounted(() => {
   store.waitForReady().then(async () => {
 
     const control = WWTControl.singleton;
+    control.renderOneFrame();
     control.renderOneFrame = renderOneFrame.bind(control);
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
+    // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
     control.renderFrameCallback = function (wwt: WWTControl) {
       drawFootprint(wwt);
     };

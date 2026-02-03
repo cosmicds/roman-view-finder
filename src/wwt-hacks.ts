@@ -8,6 +8,10 @@ export function renderOneFrame() {
   originalRenderFrame();
 
   if (this.renderFrameCallback) {
-    this.renderFrameCallback(this);
+    try {
+      this.renderFrameCallback(this);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

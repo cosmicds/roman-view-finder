@@ -1,4 +1,4 @@
-import { Color, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { Color, SimpleLineList, Vector3d, WWTControl, Settings } from "@wwtelescope/engine";
 
 type Point = [number, number];
 
@@ -86,24 +86,47 @@ const shiftedCorners: Point[][] = corners.map(corner => corner.map(pair => [pair
 
 function getScreenPoints(wwt: WWTControl, worldPts: Point[]): Point[] {
   return worldPts.map(pt => {
-    const screen = wwt.getCoordinatesForScreenPoint(...pt);
-    return [(15 * screen.x + 720) % 360, screen.y];
+    const screen = wwt.getScreenPointForCoordinates(pt[0] / 15, pt[1]);
+    return [screen.x, screen.y];
   });
 }
 
 function _getWorldPoints(wwt: WWTControl, screenPts: Point[]): Point[] {
   return screenPts.map(pt => {
-    const raDec = wwt.getCoordinatesForScreenPoint(pt[0] / 15, pt[1]);
-    return [raDec.x, raDec.y];
+    const raDec = wwt.getCoordinatesForScreenPoint(...pt);
+    return [15 * (raDec.x + 720) / 360, raDec.y];
   });
+}
+
+// f(W) = 1
+// f(0) = -1
+// f(X) = m * X + b
+// slope = 2 / W
+// intercept = f(0) - m * 0 = -1
+
+// NB: Clip space is the space [-1, 1]^2
+function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point[][] {
+  const width = wwt.renderContext.width;
+  const height = wwt.renderContext.height;
+  const slopeH = 2 / width;
+  const interceptH = -1;
+  const slopeV = 2 / height;
+  const interceptV = -1;
+  const transform = (point: Point): Point => [point[0] * slopeH + interceptH, point[1] * slopeV + interceptV];
+  return screenPts.map(box => box.map(transform));
 }
 
 let lastZoom: number | null = null;
 let lastRoll: number | null = null;
-let screenPoints: [number, number][][] = [];
+let clipPoints: Point[][] = [];
+let footprint = new SimpleLineList();
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.SLL = SimpleLineList; window.Vec = Vector3d; window.wwt = WWTControl.singleton; window.white = Color.fromArgb(255, 255, 255, 255); window.Color = Color; window.settings = Settings.get_active();
 
 export function drawFootprint(wwt: WWTControl) {
-  const footprint = new SimpleLineList();
+  footprint = new SimpleLineList();
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
 
@@ -111,18 +134,19 @@ export function drawFootprint(wwt: WWTControl) {
   const needUpdate = (lastZoom == null) || (lastRoll == null) || (camera.zoom != lastZoom) || (camera.rotation != lastRoll);
 
   if (needUpdate) {
-    screenPoints = shiftedCorners.map(box => getScreenPoints(wwt, box));
+    const screenPoints = shiftedCorners.map(box => getScreenPoints(wwt, box));
+    clipPoints = convertScreenPointsToClip(wwt, screenPoints);
     lastZoom = camera.zoom;
     lastRoll = camera.rotation;
   }
 
-  screenPoints.forEach(box => {
+
+  clipPoints.forEach(box => {
     for (let i = 0; i < box.length - 1; i++) {
       footprint.addLine(Vector3d.create(box[i][0], box[i][1], 0), Vector3d.create(box[i+1][0], box[i+1][1], 0));
     }
     footprint.addLine(Vector3d.create(box[box.length-1][0], box[box.length-1][1], 0), Vector3d.create(box[0][0], box[0][1], 0));
   });
 
-  console.log(footprint);
-  footprint.drawLines(wwt.renderContext, 1, Color.fromArgb(255, 255, 255, 255));
+  footprint.drawLines(wwt.renderContext, 1, Color.fromArgb(255, 255, 0, 0));
 }
