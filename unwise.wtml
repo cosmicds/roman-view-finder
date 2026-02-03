@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Folder Browseable="True" Group="Explorer" Name="JWST SMACS 0723" Searchable="True">
+    <ImageSet MSRCommunityId="0" MSRComponentId="0" Permission="0" Generic="False" DataSetType="Sky" BandPass="IR" Url="https://alasky.u-strasbg.fr/unWISE/color-W2-W1W2-W1/Norder{0}/Dir{1}/Npix{2}" TileLevels="8" WidthFactor="1" Sparse="True" Rotation="0" QuadTreeMap="0123" Projection="Healpix" Name="unWISE color, from W2 and W1 bands" FileType="jpeg" CenterY="0" CenterX="0" BottomsUp="False" StockSet="False" ElevationModel="False" OffsetX="0" OffsetY="0" BaseTileLevel="0" BaseDegreesPerTile="180" ReferenceFrame="Sky" MeanRadius="1">
+        <Credits>IPAC/NASA - D. Lang for the reprocessing</Credits>
+        <ThumbnailUrl>https://alasky.u-strasbg.fr/unWISE/color-W2-W1W2-W1/preview.jpg</ThumbnailUrl>
+      </ImageSet>
+</Folder>
+
