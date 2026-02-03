@@ -1,4 +1,4 @@
-import { Color, SimpleLineList, Vector3d, WWTControl, Settings, CameraParameters } from "@wwtelescope/engine";
+import { Color, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
 
 type Point = [number, number];
 
@@ -98,12 +98,6 @@ function _getWorldPoints(wwt: WWTControl, screenPts: Point[]): Point[] {
   });
 }
 
-// f(W) = 1
-// f(0) = -1
-// f(X) = m * X + b
-// slope = 2 / W
-// intercept = f(0) - m * 0 = -1
-
 // NB: Clip space is the space [-1, 1]^2
 function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point[][] {
   const width = wwt.renderContext.width;
@@ -116,42 +110,17 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
   return screenPts.map(box => box.map(transform));
 }
 
-let lastZoom: number | null = null;
-let clipPoints: Point[][] = [];
-let footprint = new SimpleLineList();
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.SLL = SimpleLineList; window.Vec = Vector3d; window.wwt = WWTControl.singleton; window.white = Color.fromArgb(255, 255, 255, 255); window.Color = Color; window.settings = Settings.get_active();
-
-const fakeWWT = Object.assign(WWTControl.singleton, {});
-fakeWWT.renderContext = Object.assign(WWTControl.singleton.renderContext, {});
-const fakeCamera = new CameraParameters();
-fakeCamera.lat = 0;
-fakeCamera.lng = 0;
-fakeCamera.rotation = 0;
-fakeWWT.renderContext.viewCamera = fakeCamera;
-
-let display = true;
-
 export function drawFootprint(wwt: WWTControl) {
-  footprint = new SimpleLineList();
+  const footprint = new SimpleLineList();
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
 
   const camera = wwt.renderContext.viewCamera;
-  const needUpdate = (lastZoom == null) || (camera.zoom != lastZoom);
 
-  display = !needUpdate;
-
-  if (needUpdate) {
-    fakeCamera.zoom = camera.zoom;
-    const screenPoints = shiftedCorners.map(box => getScreenPoints(fakeWWT, box));
-    clipPoints = convertScreenPointsToClip(fakeWWT, screenPoints);
-    lastZoom = camera.zoom;
-  }
-
-  if (!display) { return; }
+  const boxCoordinates: Point[][] = shiftedCorners.map(corner => corner.map(pair => [pair[0] + wwt.renderContext.get_RA() * 15, pair[1] + wwt.renderContext.get_dec()]));
+  const screenPoints = boxCoordinates.map(box => getScreenPoints(wwt, box));
+  const clipPoints = convertScreenPointsToClip(wwt, screenPoints);
+  wwt.renderContext.viewCamera = camera;
 
   clipPoints.forEach(box => {
     for (let i = 0; i < box.length - 1; i++) {

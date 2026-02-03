@@ -215,7 +215,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
-import { Settings, WWTControl } from "@wwtelescope/engine";
+import { WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
@@ -274,8 +274,6 @@ const tab = ref(0);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
-
-    Settings.get_active().set_showCrosshairs(true);
 
     const control = WWTControl.singleton;
     control.renderOneFrame();
