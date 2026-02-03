@@ -215,10 +215,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
 import { storeToRefs } from "pinia";
+
+import { drawFootprint } from "./footprint";
+import { renderOneFrame } from "./wwt-hacks";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -255,8 +259,6 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
     };
   }
 });
-
-
         
 const backgroundImagesets = reactive<BackgroundImageset[]>([
   new BackgroundImageset("DSS", "Digitized Sky Survey (Color)"),
@@ -272,10 +274,21 @@ const tab = ref(0);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
+
+    const control = WWTControl.singleton;
+    control.renderOneFrame();
+    control.renderOneFrame = renderOneFrame.bind(control);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
+    control.renderFrameCallback = function (wwt: WWTControl) {
+      drawFootprint(wwt);
+    };
+
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands")); 
     });
-    console.log(backgroundImagesets);
     store.gotoRADecZoom({
       ...props.initialCameraParams,
       instant: true
