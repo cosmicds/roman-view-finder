@@ -229,6 +229,7 @@ __metadata:
     "@vue/cli-service": "npm:^5.0.8"
     "@vue/compiler-sfc": "npm:^3.4.15"
     "@vue/eslint-config-typescript": "npm:^12.0.0"
+    "@wwtelescope/engine": "npm:^7.31.0"
     "@wwtelescope/engine-pinia": "npm:^0.9.0"
     eslint: "npm:^8.56.0"
     eslint-plugin-vue: "npm:^9.20.1"
@@ -1615,6 +1616,17 @@ __metadata:
     pako: "npm:^1.0.11"
     uuid: "npm:^8.3.2"
   checksum: 10c0/3d2ae91fefd8b568ce52f075d6440791d7fe51526f39b90f9e8b5e599977fba84cd3f06a01965cd3fc9eb3b29c382ae9ef9b7453885d541cdecfd91e06f856db
+  languageName: node
+  linkType: hard
+
+"@wwtelescope/engine@npm:^7.31.0":
+  version: 7.31.0
+  resolution: "@wwtelescope/engine@npm:7.31.0"
+  dependencies:
+    "@wwtelescope/engine-types": "npm:>=0.6.0"
+    pako: "npm:^1.0.11"
+    uuid: "npm:^8.3.2"
+  checksum: 10c0/b9bda1d3271c1514c95244a7e74c44a43ce9dd3ccf61b52205d1d8f3c17457475698a16d16857b3a891b23368282ed2255166b2b941043842b7c92b50bd427ea
   languageName: node
   linkType: hard
 

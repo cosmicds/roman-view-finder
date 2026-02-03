@@ -7,6 +7,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.5",
     "@mdi/font": "^7.4.47",
+    "@wwtelescope/engine": "^7.31.0",
     "@wwtelescope/engine-pinia": "^0.9.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
