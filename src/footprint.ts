@@ -1,4 +1,4 @@
-import { Color, SimpleLineList, Vector3d, WWTControl, Settings } from "@wwtelescope/engine";
+import { Color, SimpleLineList, Vector3d, WWTControl, Settings, CameraParameters } from "@wwtelescope/engine";
 
 type Point = [number, number];
 
@@ -117,7 +117,6 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
 }
 
 let lastZoom: number | null = null;
-let lastRoll: number | null = null;
 let clipPoints: Point[][] = [];
 let footprint = new SimpleLineList();
 
@@ -125,21 +124,34 @@ let footprint = new SimpleLineList();
 // @ts-ignore
 window.SLL = SimpleLineList; window.Vec = Vector3d; window.wwt = WWTControl.singleton; window.white = Color.fromArgb(255, 255, 255, 255); window.Color = Color; window.settings = Settings.get_active();
 
+const fakeWWT = Object.assign(WWTControl.singleton, {});
+fakeWWT.renderContext = Object.assign(WWTControl.singleton.renderContext, {});
+const fakeCamera = new CameraParameters();
+fakeCamera.lat = 0;
+fakeCamera.lng = 0;
+fakeCamera.rotation = 0;
+fakeWWT.renderContext.viewCamera = fakeCamera;
+
+let display = true;
+
 export function drawFootprint(wwt: WWTControl) {
   footprint = new SimpleLineList();
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
 
   const camera = wwt.renderContext.viewCamera;
-  const needUpdate = (lastZoom == null) || (lastRoll == null) || (camera.zoom != lastZoom) || (camera.rotation != lastRoll);
+  const needUpdate = (lastZoom == null) || (camera.zoom != lastZoom);
+
+  display = !needUpdate;
 
   if (needUpdate) {
-    const screenPoints = shiftedCorners.map(box => getScreenPoints(wwt, box));
-    clipPoints = convertScreenPointsToClip(wwt, screenPoints);
+    fakeCamera.zoom = camera.zoom;
+    const screenPoints = shiftedCorners.map(box => getScreenPoints(fakeWWT, box));
+    clipPoints = convertScreenPointsToClip(fakeWWT, screenPoints);
     lastZoom = camera.zoom;
-    lastRoll = camera.rotation;
   }
 
+  if (!display) { return; }
 
   clipPoints.forEach(box => {
     for (let i = 0; i < box.length - 1; i++) {
