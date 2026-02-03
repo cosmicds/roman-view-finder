@@ -10,6 +10,10 @@
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
 
+    <canvas
+      id="shadow"
+    ></canvas>
+
     <transition name="fade">
       <div
         class="modal"
@@ -430,6 +434,14 @@ body {
     margin: 0;
     padding: 0;
   }
+}
+
+#shadow {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  position: static;
+  opacity: 0;
 }
 
 
