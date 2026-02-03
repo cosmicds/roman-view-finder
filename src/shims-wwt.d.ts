@@ -1,10 +1,10 @@
-//* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/naming-convention */
 
-import { Color, RenderContext, WWTControl } from "@wwtelescope/engine";
+import { Color, RenderContext } from "@wwtelescope/engine";
 
 declare module "@wwtelescope/engine" {
 
-  export class Matrix3d {};
+  export class Matrix3d {}
 
   export class Vector3d {
     static create(x: number, y: number, z: number): Vector3d;
