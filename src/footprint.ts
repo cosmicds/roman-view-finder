@@ -1,4 +1,4 @@
-import { Color, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { Color, RenderContext, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
 
 type Point = [number, number];
 
@@ -79,6 +79,9 @@ const corners: Point[][] =
 // const nRegions = corners.length;
 const nPoints = corners.reduce((currVal, corner) => currVal + corner.length, 0);
 
+const fakeControl = new WWTControl();
+fakeControl.renderContext = new RenderContext();
+
 const meanIndex = (index: number) => corners.reduce((currVal, corner) => currVal + corner.reduce((curr, pair) => curr + pair[index], 0), 0) / nPoints;
 const meanRA = meanIndex(0);
 const meanDec = meanIndex(1);
@@ -110,17 +113,28 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
   return screenPts.map(box => box.map(transform));
 }
 
+let fakeRendered = false;
 export function drawFootprint(wwt: WWTControl) {
+  if (!fakeRendered) {
+    const shadow = document.getElementById("shadow") as HTMLCanvasElement;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    fakeControl.canvas = shadow; fakeControl.renderContext.gl = shadow.getContext("webgl2"); fakeControl.renderContext.set_backgroundImageset(wwt.renderContext.get_backgroundImageset());
+    fakeControl.renderOneFrame();
+    fakeRendered = true;
+  }
   const footprint = new SimpleLineList();
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
 
   const camera = wwt.renderContext.viewCamera;
+  fakeControl.renderContext.viewCamera.zoom = camera.zoom;
 
-  const boxCoordinates: Point[][] = shiftedCorners.map(corner => corner.map(pair => [pair[0] + wwt.renderContext.get_RA() * 15, pair[1] + wwt.renderContext.get_dec()]));
-  const screenPoints = boxCoordinates.map(box => getScreenPoints(wwt, box));
-  const clipPoints = convertScreenPointsToClip(wwt, screenPoints);
-  wwt.renderContext.viewCamera = camera;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  fakeControl.renderContext.set_projection(wwt.renderContext.get_projection());
+  const screenPoints = shiftedCorners.map(box => getScreenPoints(fakeControl, box));
+  const clipPoints = convertScreenPointsToClip(fakeControl, screenPoints);
 
   clipPoints.forEach(box => {
     for (let i = 0; i < box.length - 1; i++) {
