@@ -527,6 +527,12 @@ body {
   gap: 5px;
 }
 
+#body-logos {
+  position: absolute;
+  right: 0.5em;
+  bottom: 0.5em;
+}
+
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
 :focus-visible,
 button:focus-visible,
