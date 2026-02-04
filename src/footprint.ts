@@ -114,7 +114,7 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
 }
 
 let fakeRendered = false;
-export function drawFootprint(wwt: WWTControl) {
+export function drawFootprint(wwt: WWTControl, color: Color) {
   if (!fakeRendered) {
     const shadow = document.getElementById("shadow") as HTMLCanvasElement;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -143,5 +143,5 @@ export function drawFootprint(wwt: WWTControl) {
     footprint.addLine(Vector3d.create(box[box.length-1][0], box[box.length-1][1], 0), Vector3d.create(box[0][0], box[0][1], 0));
   });
 
-  footprint.drawLines(wwt.renderContext, 1, Color.fromArgb(255, 255, 0, 0));
+  footprint.drawLines(wwt.renderContext, 1, color);
 }
