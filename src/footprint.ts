@@ -1,6 +1,9 @@
 /* eslint-disable */
 
-import { Color, RenderContext, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { Color, Coordinates, Dates, RenderContext, Settings, SimpleLineList, SpaceTimeController, TriangleList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { horizontalToEquatorial } from "./utils";
+import { D2H, H2D } from "@wwtelescope/astro";
+import { TriangleList2D } from "./wwt-hacks";
 
 type Point = [number, number];
 
@@ -143,8 +146,6 @@ export function drawFootprint(wwt: WWTControl, options: DrawFootprintOptions) {
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
 
-  const triangles = new TriangleList();
-
   const camera = wwt.renderContext.viewCamera;
   fakeControl.renderContext.viewCamera.zoom = camera.zoom;
 
@@ -154,12 +155,40 @@ export function drawFootprint(wwt: WWTControl, options: DrawFootprintOptions) {
   const screenPoints = positionedShiftedCorners.map(box => getScreenPoints(fakeControl, box));
   const clipPoints = convertScreenPointsToClip(fakeControl, screenPoints);
 
+  const triangles = new TriangleList2D();
+  triangles.pure2D = true;
+  triangles.depthBuffered = true;
+  const date = new Dates(0, 1);
+
   clipPoints.forEach(box => {
+    const vectors = box.map(pt => Vector3d.create(...pt, 0));
     for (let i = 0; i < box.length - 1; i++) {
-      footprint.addLine(Vector3d.create(box[i][0], box[i][1], 0), Vector3d.create(box[i+1][0], box[i+1][1], 0));
+      footprint.addLine(vectors[i], vectors[i+1]);
     }
-    footprint.addLine(Vector3d.create(box[box.length-1][0], box[box.length-1][1], 0), Vector3d.create(box[0][0], box[0][1], 0));
+    footprint.addLine(vectors[box.length - 1], vectors[0]);
+
+    if (options.fill) {
+      const triangleColor = Color.fromArgb(Math.round(options.fillOpacity * 255), options.color.r, options.color.g, options.color.b);
+      triangles.addTriangle(vectors[0], vectors[1], vectors[2], triangleColor, date);
+      triangles.addTriangle(vectors[2], vectors[3], vectors[0], triangleColor, date);
+    }
   });
 
+  // if (options.fill) {
+  //   const triangleColor = Color.fromArgb(Math.round(options.fillOpacity * 255), options.color.r, options.color.g, options.color.b);
+  //   const ra = wwt.renderContext.get_RA() * H2D;
+  //   const dec = wwt.renderContext.get_dec();
+  //   shiftedCorners.forEach(box => {
+  //     console.log(box.map(pt => [pt[0] + ra, pt[1] + dec]));
+  //     const vectors = box.map(pt => Coordinates.raDecTo3d((pt[0] + ra) * D2H, pt[1] + dec));
+  //     triangles.addSubdividedTriangles(vectors[0], vectors[1], vectors[2], triangleColor, date, subdivisions);
+  //     triangles.addSubdividedTriangles(vectors[2], vectors[3], vectors[0], triangleColor, date, subdivisions);
+  //   });
+  // }
+
   footprint.drawLines(wwt.renderContext, 1, options.color);
+
+  if (options.fill) {
+     triangles.draw(wwt.renderContext, options.fillOpacity, true);
+  }
 }

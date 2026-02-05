@@ -373,7 +373,11 @@ onMounted(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     control.renderFrameCallback = function (wwt: WWTControl) {
-      drawFootprint(wwt, footprintColor.value);
+      drawFootprint(wwt, {
+        color: footprintColor.value,
+        fill: fill.value,
+        fillOpacity: fillOpacity.value,
+      });
     };
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
