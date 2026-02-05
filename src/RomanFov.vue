@@ -72,6 +72,13 @@
             item-value="imagesetName"
           >
           </v-select>
+          <v-checkbox
+            v-model="decimalCoordinates"
+            :color="accentColor"
+            label="Show decimal coordinates"
+            density="compact"
+            hide-details
+          ></v-checkbox>
           <div>
             <label
               for="footprint-color"
@@ -91,6 +98,7 @@
               label="Fill"
               density="compact"
               hide-details
+              :color="accentColor"
             ></v-checkbox>
             <v-slider
               v-model="fillOpacity"
@@ -98,6 +106,9 @@
               :max="1"
               :step="0.01"
               :disabled="!fill"
+              :color="accentColor"
+              density="compact"
+              hide-details
             />
           </div>
           <div id="crosshairs-row">
@@ -279,7 +290,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
-import { fmtDegLat, fmtHours } from "@wwtelescope/astro";
+import { fmtDegLat, fmtHours, R2D } from "@wwtelescope/astro";
 import { Color, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -344,7 +355,12 @@ const tab = ref(0);
 const footprintColorString = ref("#c885ee");
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
-const coordinates = computed(() => `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`);
+const decimalCoordinates = ref(false);
+const coordinates = computed(() => {
+  return decimalCoordinates.value ? 
+    `${(raRad.value * R2D).toFixed(6)} ${(decRad.value * R2D).toFixed(6)}` :
+    `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`;
+});
 const galactic = ref(false);
 const crosshairs = ref(false);
 const crosshairsColor = ref("#ffffff");
@@ -799,7 +815,7 @@ video {
   }
 }
 
-#crosshairs-row {
+#crosshairs-row, #fill-row {
   display: flex;
   flex-direction: row;
   gap: 5px;
