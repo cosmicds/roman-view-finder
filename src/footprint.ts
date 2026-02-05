@@ -85,11 +85,13 @@ const fakeControl = new WWTControl();
 fakeControl.renderContext = new RenderContext();
 
 const meanIndex = (index: number) => corners.reduce((currVal, corner) => currVal + corner.reduce((curr, pair) => curr + pair[index], 0), 0) / nPoints;
+
 // const meanRA = meanIndex(0);
 // const meanDec = meanIndex(1);
 const meanRA = 0;
 const meanDec = 0;
 const shiftedCorners: Point[][] = corners.map(corner => corner.map(pair => [pair[0] - meanRA, pair[1] - meanDec]));
+let positionedShiftedCorners: Point[][] = shiftedCorners;
 
 function getScreenPoints(wwt: WWTControl, worldPts: Point[]): Point[] {
   return worldPts.map(pt => {
@@ -121,7 +123,7 @@ let fakeRendered = false;
 export function drawFootprint(wwt: WWTControl, color: Color) {
   if (!fakeRendered) {
     const shadow = document.getElementById("shadow") as HTMLCanvasElement;
-    console.log(wwt.renderContext.get_RA(), wwt.renderContext.get_dec());
+    positionedShiftedCorners = shiftedCorners.map(corner => corner.map(pair => [pair[0] + wwt.renderContext.get_RA() * 15, pair[1] + wwt.renderContext.get_dec()]));
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     fakeControl.canvas = shadow; fakeControl.renderContext.gl = shadow.getContext("webgl2"); fakeControl.renderContext.set_backgroundImageset(wwt.renderContext.get_backgroundImageset());
@@ -141,7 +143,7 @@ export function drawFootprint(wwt: WWTControl, color: Color) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   fakeControl.renderContext.set_projection(wwt.renderContext.get_projection());
-  const screenPoints = shiftedCorners.map(box => getScreenPoints(fakeControl, box));
+  const screenPoints = positionedShiftedCorners.map(box => getScreenPoints(fakeControl, box));
   const clipPoints = convertScreenPointsToClip(fakeControl, screenPoints);
 
   clipPoints.forEach(box => {

@@ -290,8 +290,8 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
   wwtNamespace: "roman-fov",
   initialCameraParams: () => {
     return {
-      raRad: 0,
-      decRad: 0,
+      raRad: 1.4612,
+      decRad: -0.09646,
       zoomDeg: 60
     };
   }
