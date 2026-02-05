@@ -242,7 +242,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import { fmtDegLat, fmtHours } from "@wwtelescope/astro";
-import { Color, WWTControl } from "@wwtelescope/engine";
+import { Color, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
@@ -311,24 +311,30 @@ const coordinates = computed(() => `${fmtHours(raRad.value)} ${fmtDegLat(decRad.
 onMounted(() => {
   store.waitForReady().then(async () => {
 
+    Settings.get_active().set_galacticMode(true);
+
     const control = WWTControl.singleton;
     control.renderOneFrame();
     control.renderOneFrame = renderOneFrame.bind(control);
 
+    store.gotoRADecZoom({
+      ...props.initialCameraParams,
+      instant: true
+    }).then(() => positionSet.value = true);
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
+    window.wwt = WWTControl.singleton; window.settings = Settings.get_active();
     // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     control.renderFrameCallback = function (wwt: WWTControl) {
       drawFootprint(wwt, footprintColor.value);
     };
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands")); 
-    });
-    store.gotoRADecZoom({
-      ...props.initialCameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
+    }); 
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
