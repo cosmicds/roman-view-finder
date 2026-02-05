@@ -1,6 +1,9 @@
 /* eslint-disable */
 
-import { Color, RenderContext, SimpleLineList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { Color, Coordinates, Dates, RenderContext, Settings, SimpleLineList, SpaceTimeController, TriangleList, Vector3d, WWTControl } from "@wwtelescope/engine";
+import { horizontalToEquatorial } from "./utils";
+import { D2H, H2D } from "@wwtelescope/astro";
+import { TriangleList2D } from "./wwt-hacks";
 
 type Point = [number, number];
 
@@ -85,11 +88,13 @@ const fakeControl = new WWTControl();
 fakeControl.renderContext = new RenderContext();
 
 const meanIndex = (index: number) => corners.reduce((currVal, corner) => currVal + corner.reduce((curr, pair) => curr + pair[index], 0), 0) / nPoints;
+
 // const meanRA = meanIndex(0);
 // const meanDec = meanIndex(1);
 const meanRA = 0;
 const meanDec = 0;
 const shiftedCorners: Point[][] = corners.map(corner => corner.map(pair => [pair[0] - meanRA, pair[1] - meanDec]));
+let positionedShiftedCorners: Point[][] = shiftedCorners;
 
 function getScreenPoints(wwt: WWTControl, worldPts: Point[]): Point[] {
   return worldPts.map(pt => {
@@ -117,11 +122,17 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
   return screenPts.map(box => box.map(transform));
 }
 
+interface DrawFootprintOptions {
+  color: Color;
+  fill: boolean;
+  fillOpacity: number;
+}
+
 let fakeRendered = false;
-export function drawFootprint(wwt: WWTControl, color: Color) {
+export function drawFootprint(wwt: WWTControl, options: DrawFootprintOptions) {
   if (!fakeRendered) {
     const shadow = document.getElementById("shadow") as HTMLCanvasElement;
-    console.log(wwt.renderContext.get_RA(), wwt.renderContext.get_dec());
+    positionedShiftedCorners = shiftedCorners.map(corner => corner.map(pair => [pair[0] + wwt.renderContext.get_RA() * 15, pair[1] + wwt.renderContext.get_dec()]));
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     fakeControl.canvas = shadow; fakeControl.renderContext.gl = shadow.getContext("webgl2"); fakeControl.renderContext.set_backgroundImageset(wwt.renderContext.get_backgroundImageset());
@@ -141,15 +152,43 @@ export function drawFootprint(wwt: WWTControl, color: Color) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   fakeControl.renderContext.set_projection(wwt.renderContext.get_projection());
-  const screenPoints = shiftedCorners.map(box => getScreenPoints(fakeControl, box));
+  const screenPoints = positionedShiftedCorners.map(box => getScreenPoints(fakeControl, box));
   const clipPoints = convertScreenPointsToClip(fakeControl, screenPoints);
 
+  const triangles = new TriangleList2D();
+  triangles.pure2D = true;
+  triangles.depthBuffered = true;
+  const date = new Dates(0, 1);
+
   clipPoints.forEach(box => {
+    const vectors = box.map(pt => Vector3d.create(...pt, 0));
     for (let i = 0; i < box.length - 1; i++) {
-      footprint.addLine(Vector3d.create(box[i][0], box[i][1], 0), Vector3d.create(box[i+1][0], box[i+1][1], 0));
+      footprint.addLine(vectors[i], vectors[i+1]);
     }
-    footprint.addLine(Vector3d.create(box[box.length-1][0], box[box.length-1][1], 0), Vector3d.create(box[0][0], box[0][1], 0));
+    footprint.addLine(vectors[box.length - 1], vectors[0]);
+
+    if (options.fill) {
+      const triangleColor = Color.fromArgb(Math.round(options.fillOpacity * 255), options.color.r, options.color.g, options.color.b);
+      triangles.addTriangle(vectors[0], vectors[1], vectors[2], triangleColor, date);
+      triangles.addTriangle(vectors[2], vectors[3], vectors[0], triangleColor, date);
+    }
   });
 
-  footprint.drawLines(wwt.renderContext, 1, color);
+  // if (options.fill) {
+  //   const triangleColor = Color.fromArgb(Math.round(options.fillOpacity * 255), options.color.r, options.color.g, options.color.b);
+  //   const ra = wwt.renderContext.get_RA() * H2D;
+  //   const dec = wwt.renderContext.get_dec();
+  //   shiftedCorners.forEach(box => {
+  //     console.log(box.map(pt => [pt[0] + ra, pt[1] + dec]));
+  //     const vectors = box.map(pt => Coordinates.raDecTo3d((pt[0] + ra) * D2H, pt[1] + dec));
+  //     triangles.addSubdividedTriangles(vectors[0], vectors[1], vectors[2], triangleColor, date, subdivisions);
+  //     triangles.addSubdividedTriangles(vectors[2], vectors[3], vectors[0], triangleColor, date, subdivisions);
+  //   });
+  // }
+
+  footprint.drawLines(wwt.renderContext, 1, options.color);
+
+  if (options.fill) {
+     triangles.draw(wwt.renderContext, options.fillOpacity, true);
+  }
 }
