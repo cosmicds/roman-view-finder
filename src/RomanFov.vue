@@ -84,6 +84,12 @@
             v-model="footprintColorString"
           />
         </div>
+        <v-checkbox
+          v-model="galactic"
+          label="Galactic mode"
+          density="compact"
+          hide-details
+        ></v-checkbox>
       </details>
     </div>
 
@@ -240,7 +246,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { fmtDegLat, fmtHours } from "@wwtelescope/astro";
 import { Color, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -307,11 +313,12 @@ const footprintColorString = ref("#c885ee");
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
 const coordinates = computed(() => `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`);
+const galactic = ref(false);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
 
-    Settings.get_active().set_galacticMode(true);
+    Settings.get_active().set_galacticMode(galactic.value);
 
     const control = WWTControl.singleton;
     control.renderOneFrame();
@@ -410,6 +417,8 @@ function selectSheet(sheetType: SheetType | null) {
     sheet.value = sheetType;
   }
 }
+
+watch(galactic, (gal: boolean) => Settings.get_active().set_galacticMode(gal));
 </script>
 
 <style lang="less">
