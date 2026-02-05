@@ -139,7 +139,7 @@ export function drawFootprint(wwt: WWTControl, options: DrawFootprintOptions) {
     fakeControl.renderOneFrame();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    fakeControl.renderContext.set_world(wwt.renderContext.get_world()); fakeControl.renderContext.set_view(wwt.renderContext.get_view());
+    fakeControl.renderContext.set_world(wwt.renderContext.get_world()); fakeControl.renderContext.set_view(wwt.renderContext.get_view()); fakeControl.renderContext.set_projection(wwt.renderContext.get_projection());
     fakeRendered = true;
   }
   const footprint = new SimpleLineList();
