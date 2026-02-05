@@ -329,9 +329,6 @@ onMounted(() => {
       instant: true
     }).then(() => positionSet.value = true);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    window.wwt = WWTControl.singleton; window.settings = Settings.get_active();
     // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
