@@ -119,8 +119,14 @@ function convertScreenPointsToClip(wwt: WWTControl, screenPts: Point[][]): Point
   return screenPts.map(box => box.map(transform));
 }
 
+interface DrawFootprintOptions {
+  color: Color;
+  fill: boolean;
+  fillOpacity: number;
+}
+
 let fakeRendered = false;
-export function drawFootprint(wwt: WWTControl, color: Color) {
+export function drawFootprint(wwt: WWTControl, options: DrawFootprintOptions) {
   if (!fakeRendered) {
     const shadow = document.getElementById("shadow") as HTMLCanvasElement;
     positionedShiftedCorners = shiftedCorners.map(corner => corner.map(pair => [pair[0] + wwt.renderContext.get_RA() * 15, pair[1] + wwt.renderContext.get_dec()]));
@@ -136,6 +142,8 @@ export function drawFootprint(wwt: WWTControl, color: Color) {
   const footprint = new SimpleLineList();
   footprint.pure2D = true;
   footprint.set_depthBuffered(true);
+
+  const triangles = new TriangleList();
 
   const camera = wwt.renderContext.viewCamera;
   fakeControl.renderContext.viewCamera.zoom = camera.zoom;
@@ -153,5 +161,5 @@ export function drawFootprint(wwt: WWTControl, color: Color) {
     footprint.addLine(Vector3d.create(box[box.length-1][0], box[box.length-1][1], 0), Vector3d.create(box[0][0], box[0][1], 0));
   });
 
-  footprint.drawLines(wwt.renderContext, 1, color);
+  footprint.drawLines(wwt.renderContext, 1, options.color);
 }

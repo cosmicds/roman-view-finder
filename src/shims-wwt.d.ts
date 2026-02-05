@@ -17,4 +17,12 @@ declare module "@wwtelescope/engine" {
     addLine(pt1: Vector3d, pt2: Vector3d): void;
     drawLines(context: RenderContext, opacity: number, color: Color): void;
   }
+
+  export class Dates {
+    constructor(start: number, end: number);
+  }
+
+  export class TriangleList {
+    addTriangle(v1: number, v2: number, v3: number, color: Color, date: Dates);
+  }
 }

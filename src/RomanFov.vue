@@ -61,35 +61,67 @@
     <div id="controls" class="bordered">
       <details open>
         <summary>Controls</summary>
-        <v-select
-          id="bg-select"
-          width="200"
-          v-model="backgroundImagesetName"
-          label="Select Background"
-          :items="backgroundImagesets"
-          item-title="displayName"
-          item-value="imagesetName"
-        >
-        </v-select>
-        <div>
-          <label
-            for="footprint-color"
+        <div id="controls-content">
+          <v-select
+            id="bg-select"
+            width="200"
+            v-model="backgroundImagesetName"
+            label="Select Background"
+            :items="backgroundImagesets"
+            item-title="displayName"
+            item-value="imagesetName"
           >
-            Roman footprint color
-          </label>
-          <input
-            id="footprint-color"
-            class="bordered"
-            type="color"
-            v-model="footprintColorString"
-          />
+          </v-select>
+          <div>
+            <label
+              for="footprint-color"
+            >
+              FoV color
+            </label>
+            <input
+              id="footprint-color"
+              class="bordered"
+              type="color"
+              v-model="footprintColorString"
+            />
+          </div>
+          <div id="fill-row">
+            <v-checkbox
+              v-model="fill"
+              label="Fill"
+              density="compact"
+              hide-details
+            ></v-checkbox>
+            <v-slider
+              v-model="fillOpacity"
+              :min="0"
+              :max="1"
+              :step="0.01"
+              :disabled="!fill"
+            />
+          </div>
+          <div id="crosshairs-row">
+            <v-checkbox
+              v-model="crosshairs"
+              label="Show crosshairs"
+              density="compact"
+              hide-details
+            ></v-checkbox>
+            <input
+              id="crosshairs-color"
+              class="bordered"
+              type="color"
+              v-model="crosshairsColor"
+              :disabled="!crosshairs"
+            />
+          </div>
+          <v-checkbox
+            v-model="galactic"
+            label="Galactic mode"
+            density="compact"
+            hide-details
+          ></v-checkbox>
         </div>
-        <v-checkbox
-          v-model="galactic"
-          label="Galactic mode"
-          density="compact"
-          hide-details
-        ></v-checkbox>
       </details>
     </div>
 
@@ -314,11 +346,19 @@ const footprintColor = computed(() => Color.load(footprintColorString.value));
 
 const coordinates = computed(() => `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`);
 const galactic = ref(false);
+const crosshairs = ref(false);
+const crosshairsColor = ref("#ffffff");
+const fill = ref(false);
+const fillOpacity = ref(0.5);
+
+const settings = Settings.get_active();
 
 onMounted(() => {
   store.waitForReady().then(async () => {
 
-    Settings.get_active().set_galacticMode(galactic.value);
+    settings.set_galacticMode(galactic.value);
+    settings.set_showCrosshairs(crosshairs.value);
+    settings.set_crosshairsColor(crosshairsColor.value);
 
     const control = WWTControl.singleton;
     control.renderOneFrame();
@@ -415,7 +455,9 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
-watch(galactic, (gal: boolean) => Settings.get_active().set_galacticMode(gal));
+watch(galactic, (gal: boolean) => settings.set_galacticMode(gal));
+watch(crosshairs, (show: boolean) => settings.set_showCrosshairs(show));
+watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
 </script>
 
 <style lang="less">
@@ -745,5 +787,18 @@ video {
   background: transparent;
   backdrop-filter: blur(5px);
   border-color: var(--accent-color);
+
+  #controls-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+#crosshairs-row {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
 }
 </style>
