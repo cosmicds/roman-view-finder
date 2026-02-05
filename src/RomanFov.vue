@@ -49,7 +49,18 @@
         >
         </icon-button>
       </div>
-      <div id="center-buttons">
+      <div id="center-content">
+        <div id="coordinates" class="bordered">
+          <pre>{{ coordinates }}</pre>
+        </div>
+      </div>
+      <div id="right-buttons">
+      </div>
+    </div>
+
+    <div id="controls" class="bordered">
+      <details open>
+        <summary>Controls</summary>
         <v-select
           id="bg-select"
           width="200"
@@ -60,9 +71,26 @@
           item-value="imagesetName"
         >
         </v-select>
-      </div>
-      <div id="right-buttons">
-      </div>
+        <div>
+          <label
+            for="footprint-color"
+          >
+            Roman footprint color
+          </label>
+          <input
+            id="footprint-color"
+            class="bordered"
+            type="color"
+            v-model="footprintColorString"
+          />
+        </div>
+        <v-checkbox
+          v-model="galactic"
+          label="Galactic mode"
+          density="compact"
+          hide-details
+        ></v-checkbox>
+      </details>
     </div>
 
 
@@ -218,8 +246,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
-import { WWTControl } from "@wwtelescope/engine";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
+import { fmtDegLat, fmtHours } from "@wwtelescope/astro";
+import { Color, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
@@ -237,7 +266,11 @@ export interface RomanFovProps {
 
 const store = engineStore();
 
-const { backgroundImageset } = storeToRefs(store);
+const {
+  backgroundImageset,
+  decRad,
+  raRad,
+} = storeToRefs(store);
 
 const backgroundImagesetName = computed({
   get(): string | undefined {
@@ -272,31 +305,40 @@ const backgroundImagesets = reactive<BackgroundImageset[]>([
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
-const accentColor = ref("#ffffff");
-const buttonColor = ref("#ffffff");
+const accentColor = ref("#c885ee");
+const buttonColor = ref("#c885ee");
 const tab = ref(0);
+
+const footprintColorString = ref("#c885ee");
+const footprintColor = computed(() => Color.load(footprintColorString.value));
+
+const coordinates = computed(() => `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`);
+const galactic = ref(false);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
+
+    Settings.get_active().set_galacticMode(galactic.value);
 
     const control = WWTControl.singleton;
     control.renderOneFrame();
     control.renderOneFrame = renderOneFrame.bind(control);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
-    control.renderFrameCallback = function (wwt: WWTControl) {
-      drawFootprint(wwt);
-    };
-
-    await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
-      backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands")); 
-    });
     store.gotoRADecZoom({
       ...props.initialCameraParams,
       instant: true
     }).then(() => positionSet.value = true);
+
+    // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    control.renderFrameCallback = function (wwt: WWTControl) {
+      drawFootprint(wwt, footprintColor.value);
+    };
+
+    await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
+      backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands")); 
+    }); 
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
@@ -372,6 +414,8 @@ function selectSheet(sheetType: SheetType | null) {
     sheet.value = sheetType;
   }
 }
+
+watch(galactic, (gal: boolean) => Settings.get_active().set_galacticMode(gal));
 </script>
 
 <style lang="less">
@@ -527,6 +571,12 @@ body {
   gap: 5px;
 }
 
+#body-logos {
+  position: absolute;
+  right: 0.5em;
+  bottom: 0.5em;
+}
+
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
 :focus-visible,
 button:focus-visible,
@@ -672,7 +722,28 @@ video {
   pointer-events: auto;
 
   &:hover {
+    color: var(--accent-color);
     cursor: pointer;
   }
+}
+
+.bordered {
+  border: 1px solid rgb(var(--v-theme-on-surface));
+  padding-inline: 0.5em;
+  border-radius: 5px;
+}
+
+#coordinates {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+#controls {
+  position: absolute;
+  right: 0.5em;
+  top: 1em;
+  background: transparent;
+  backdrop-filter: blur(5px);
+  border-color: var(--accent-color);
 }
 </style>
