@@ -16,16 +16,16 @@ function _parseSesameResolver(resolverElement: Element): Exclude<ResolvedObject,
   return {
     oname: oname ? oname.textContent : '<NO oname>',
     otype: otype ? otype.textContent : '<NO otype>',
-    raDeg: jradeg ? parseFloat(jradeg.textContent) : NaN,
-    decDeg: jdedeg ? parseFloat(jdedeg.textContent) : NaN,
+    raDeg: (jradeg && jradeg.textContent) ? parseFloat(jradeg.textContent) : NaN,
+    decDeg: (jdedeg && jdedeg.textContent) ? parseFloat(jdedeg.textContent) : NaN,
   };
 }
 
 
 interface SesameOptions  {
   svna: string; // SVNA
-  ignoreCache: boolean, // default: false
-  includeIdentifiers: boolean; // default: falsefalse
+  ignoreCache: boolean, // default: true
+  includeIdentifiers: boolean; // default: false
   includeFluxes: boolean; // defautl: false
 }
 /**
@@ -50,7 +50,7 @@ export async function sesameNameResolver(object_name: string, options?: SesameOp
   }
   
   let db = options?.svna || 'SNV';
-  if (options?.ignoreCache) {
+  if (options?.ignoreCache !== false) {
     db = '~' + db;
   }
   // we will always do a Simbad first search
