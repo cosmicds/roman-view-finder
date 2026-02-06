@@ -122,9 +122,12 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
-      <div id="position-controls">
-      <div class="position-label">Go to</div>
-      <simbad-resolver goto/>
+    <v-row id="position-layout" align="center">
+      <v-col cols="10" md="auto" class="d-flex align-center ga-3" style="min-width: 250px;">
+        <div class="position-label">Go to</div>
+        <simbad-resolver goto class="flex-grow-1"/>
+      </v-col>
+      <v-col cols="10" md="5" class="d-flex align-center ga-3 flex-grow-1">
       <div class="position-label">or</div>
         <div id="position-form">
           <v-text-field
@@ -156,6 +159,8 @@
           block
         ></v-btn>
         </div>
+      </v-col>
+    </v-row>
         <v-snackbar
           v-if="positionSearchError"
           :text="positionSearchError"
@@ -165,7 +170,6 @@
           location="top"
         >
         </v-snackbar>
-      </div>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos/>
       </div>
@@ -910,36 +914,22 @@ video {
 }
 
 #bottom-content {
-  display: flex;
-  flex-direction: row;
   position: absolute;
   bottom: 1rem;
-  right: 1rem;
+  left: 1rem;
   width: calc(100% - 2rem);
   pointer-events: auto;
-  align-items: center;
-  gap: 5px;
 }
 
-#position-controls {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 1rem;
+#position-layout {
   font-family: monospace;
-}
-#simbad-resolver {
-  flex: 1 0 25%; 
-  min-width: 250px;
 }
 
 #position-form {
-  flex: 1 0 75%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  height: min-content;
   gap: 1rem;
+  flex-grow: 1
 }
 
 .position-label { 
