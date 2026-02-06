@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
 import { simbadNameResolver, ResolvedObject } from './simbad_resolvers';
+import { sesameNameResolver } from './sesame_resolver';
 import { engineStore } from '@wwtelescope/engine-pinia';
 import { D2R } from "@wwtelescope/astro";
 
@@ -37,6 +38,7 @@ const name = ref<string | null>(null);
 const details = ref<ResolvedObject | null>(null);
 const errorMessage = ref('');
 
+const resolver: 'sesame' | 'simbad' = 'sesame';
 
 function goTo(object: ResolvedObject) {
   if (object?.raDeg && object?.decDeg) {
@@ -55,7 +57,7 @@ function resolveName() {
   console.log(`resolving ${name.value}`);
   errorMessage.value = '';
   if (name.value) {
-    simbadNameResolver(name.value)
+    (resolver === 'simbad' ? simbadNameResolver: sesameNameResolver)(name.value)
       .then(d => {
         details.value = d;
         emits('resolved', d);
