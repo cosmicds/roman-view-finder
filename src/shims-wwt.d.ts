@@ -4,7 +4,10 @@ import { Color, RenderContext } from "@wwtelescope/engine";
 
 declare module "@wwtelescope/engine" {
 
-  export const WEBGL;
+  export class Coordinates {
+    static parseRA(ra: string, degrees: true): number;
+    static parseDec(dec: string): number;
+  }
 
   export const ss;
 
