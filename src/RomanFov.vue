@@ -32,110 +32,95 @@
 
     <div id="top-content">
       <div id="left-buttons">
-        <icon-button
-          v-model="showTextSheet"
-          fa-icon="book-open"
-          :color="buttonColor"
-          :tooltip-text="showTextSheet ? 'Hide Info' : 'Learn More'"
-          tooltip-location="start"
-        >
-        </icon-button>
-        <icon-button
-          v-model="showVideoSheet"
-          fa-icon="video"
-          :color="buttonColor"
-          tooltip-text="Watch video"
-          tooltip-location="start"
-        >
-        </icon-button>
-      </div>
-      <div id="center-content">
-        <div id="coordinates" class="bordered">
+        <div id="coordinates" class="info-box">
           <pre>{{ coordinates }}</pre>
         </div>
       </div>
+      <div id="center-content">
+      </div>
       <div id="right-buttons">
+        <div id="controls" class="info-box">
+          <details open>
+            <summary></summary>
+            <v-select
+              id="bg-select"
+              width="200"
+              v-model="backgroundImagesetName"
+              label="Select Background"
+              :items="backgroundImagesets"
+              :list-props="{bgColor: backgroundColorDarkest}"
+              variant="solo-filled"
+              item-title="displayName"
+              item-value="imagesetName"
+              :bg-color="backgroundColor"
+              :item-color="textColor"
+              density="compact"
+              hide-details
+            >
+            </v-select>
+            <div class="centered-content pt-4 pb-3 pl-1">
+              <label
+                for="footprint-color"
+              >
+                Footprint Color:
+              </label>
+              <input
+                id="footprint-color"
+                class="bordered"
+                type="color"
+                v-model="footprintColorString"
+              />
+            </div>
+            <div id="crosshairs-row" class="centered-content">
+              <v-checkbox
+                v-model="crosshairs"
+                label="Show crosshairs"
+                density="compact"
+                hide-details
+              ></v-checkbox>
+              <input
+                v-show="crosshairs"
+                id="crosshairs-color"
+                class="bordered"
+                type="color"
+                v-model="crosshairsColor"
+                :disabled="!crosshairs"
+              />
+            </div>
+            <div id="fill-row" class="centered-content">
+              <v-checkbox
+                v-model="fill"
+                label="Fill"
+                density="compact"
+                hide-details
+              ></v-checkbox>
+              <v-slider
+                v-model="fillOpacity"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :disabled="!fill"
+                :color="footprintColorString"
+                density="compact"
+                hide-details
+              />
+            </div>
+            <v-checkbox
+              v-model="decimalCoordinates"
+              label="Show decimal coordinates"
+              density="compact"
+              hide-details
+            ></v-checkbox>
+            <v-checkbox
+              v-model="galactic"
+              label="Galactic mode"
+              density="compact"
+              hide-details
+            ></v-checkbox>
+          </details>
+        </div>
       </div>
     </div>
-
-    <div id="controls" class="bordered">
-      <details open>
-        <summary>Controls</summary>
-        <div id="controls-content">
-          <v-select
-            id="bg-select"
-            width="200"
-            v-model="backgroundImagesetName"
-            label="Select Background"
-            :items="backgroundImagesets"
-            item-title="displayName"
-            item-value="imagesetName"
-          >
-          </v-select>
-          <v-checkbox
-            v-model="decimalCoordinates"
-            :color="accentColor"
-            label="Show decimal coordinates"
-            density="compact"
-            hide-details
-          ></v-checkbox>
-          <div>
-            <label
-              for="footprint-color"
-            >
-              FoV color
-            </label>
-            <input
-              id="footprint-color"
-              class="bordered"
-              type="color"
-              v-model="footprintColorString"
-            />
-          </div>
-          <div id="fill-row">
-            <v-checkbox
-              v-model="fill"
-              label="Fill"
-              density="compact"
-              hide-details
-              :color="accentColor"
-            ></v-checkbox>
-            <v-slider
-              v-model="fillOpacity"
-              :min="0"
-              :max="1"
-              :step="0.01"
-              :disabled="!fill"
-              :color="accentColor"
-              density="compact"
-              hide-details
-            />
-          </div>
-          <div id="crosshairs-row">
-            <v-checkbox
-              v-model="crosshairs"
-              label="Show crosshairs"
-              density="compact"
-              hide-details
-            ></v-checkbox>
-            <input
-              id="crosshairs-color"
-              class="bordered"
-              type="color"
-              v-model="crosshairsColor"
-              :disabled="!crosshairs"
-            />
-          </div>
-          <v-checkbox
-            v-model="galactic"
-            label="Galactic mode"
-            density="compact"
-            hide-details
-          ></v-checkbox>
-        </div>
-      </details>
-    </div>
-
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
@@ -348,18 +333,35 @@ const backgroundImagesets = reactive<BackgroundImageset[]>([
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
-const accentColor = ref("#c885ee");
-const buttonColor = ref("#c885ee");
-const tab = ref(0);
 
-const footprintColorString = ref("#c885ee");
+// Color palette generated by Claude from https://assets.science.nasa.gov/dynamicimage/assets/science/missions/rst/spacecraft-illustrations/Roman_Title_1.jpg 
+// (with some adjustments by me)
+// Deep Space Purple #502752(Background)
+// Cosmic Violet #632B7D (Background)
+// ISM Indigo #8B5FB6 (Call to Action, with Stardust White text)
+// pick one accent
+// Nebula Magenta #C77FB3 (Accents)
+// Stellar Amber #FFB86C (Accents / Contrast)
+// Electric Cyan #00F0FF (Accents)
+// Soft Lavender #B8A5D4  (Borders)
+// Stardust White #F5F0FF  (Background / text on dark)
+// Space Black #0A0515  (text on light)
+// https://contrast-grid.eightshapes.com/?version=1.1.0&background-colors=&foreground-colors=%23FFFFFF%2C%20white%0D%0A%23502762%2C%20Deep%20Space%20Purple%0D%0A%23632b7d%2C%20Cosmic%20Violet%0D%0A%238B5FB6%2C%20ISM%20Indigo%0D%0A%23C77FB3%2C%20Nebula%20Magenta%0D%0A%23FFB86C%2C%20Stellar%20Amber%0D%0A%2300F0FF%2C%20Electric%20Cyan%0D%0A%23B8A5D4%2C%20Soft%20Lavender%0D%0A%23F5F0FF%2C%20Stardust%20White%0D%0A%230A0515%2C%20Space%20Black%0D%0A%23000000%2C%20black&es-color-form__tile-size=compact&es-color-form__show-contrast=aaa&es-color-form__show-contrast=aa&es-color-form__show-contrast=aa18&es-color-form__show-contrast=dnp
+
+const backgroundColorDarkest = ref("#502752");
+const backgroundColor = ref("#632B7D");
+const borderColor = ref("#B8A5D4");
+const accentColor = ref("#C77FB3");
+const textColor = ref("#F5F0FF");
+const tab = ref(0);
+const footprintColorString = ref("#00F0FF"); // #ff00b7
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
 const decimalCoordinates = ref(false);
 const coordinates = computed(() => {
   return decimalCoordinates.value ? 
-    `${(raRad.value * R2D).toFixed(6)} ${(decRad.value * R2D).toFixed(6)}` :
-    `${fmtHours(raRad.value)} ${fmtDegLat(decRad.value)}`;
+    `RA: ${(raRad.value * R2D).toFixed(6)}  Dec: ${(decRad.value * R2D).toFixed(6)}` :
+    `RA: ${fmtHours(raRad.value)}  Dec: ${fmtDegLat(decRad.value)}`;
 });
 const galactic = ref(false);
 const crosshairs = ref(false);
@@ -427,6 +429,10 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
+    "--background-color-darkest": backgroundColorDarkest.value,
+    "--background-color": backgroundColor.value,
+    "--border-color": borderColor.value,
+    "--text-color": textColor.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
     "--info-sheet-width": infoSheetWidth.value,
@@ -788,37 +794,27 @@ video {
     cursor: pointer;
   }
 }
+.info-box{
+  font-size: 0.9rem;
+  color: white;
+  background: rgba(10, 5, 21, 0.7);
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 0.5rem;
+  pointer-events: auto;
+  border-color: var(--border-color);
+  width: 100%;  
+}
 
 .bordered {
-  border: 1px solid rgb(var(--v-theme-on-surface));
-  padding-inline: 0.5em;
-  border-radius: 5px;
+  border: 1px solid #bbbbbb;
+  padding-inline: 2px;
+  border-radius: 4px;
 }
 
-#coordinates {
-  color: var(--accent-color);
-  border-color: var(--accent-color);
-}
-
-#controls {
-  position: absolute;
-  right: 0.5em;
-  top: 1em;
-  background: transparent;
-  backdrop-filter: blur(5px);
-  border-color: var(--accent-color);
-
-  #controls-content {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-}
-
-#crosshairs-row, #fill-row {
+.centered-content {
   display: flex;
-  flex-direction: row;
-  gap: 5px;
   align-items: center;
+  gap: 10px;
 }
 </style>
