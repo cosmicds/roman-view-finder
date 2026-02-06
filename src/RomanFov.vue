@@ -285,7 +285,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
-import { fmtDegLat, fmtHours, D2R, R2D } from "@wwtelescope/astro";
+import { fmtDegLat, fmtHours, D2R, H2R, R2D } from "@wwtelescope/astro";
 import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -534,7 +534,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
 
   if (raValid && decValid) {
     store.gotoRADecZoom({
-      raRad: ra * D2R,
+      raRad: ra * H2R,
       decRad: dec * D2R,
       zoomDeg: 20,
       instant,
