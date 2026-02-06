@@ -18,7 +18,7 @@
 </div>
 </template>
 <script lang="ts" setup>
-import {ref, watch} from 'vue';
+import {ref} from 'vue';
 import { simbadNameResolver, ResolvedObject } from './simbad_resolvers';
 import { sesameNameResolver } from './sesame_resolver';
 import { engineStore } from '@wwtelescope/engine-pinia';
