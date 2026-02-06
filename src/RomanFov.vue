@@ -442,7 +442,7 @@ function selectSheet(sheetType: SheetType | null) {
 function tryGoToSearchPosition() {
   positionSearchError.value = null;
 
-  const ra = Coordinates.parseRA(positionSearchRA.value, true);
+  const ra = Coordinates.parseRA(positionSearchRA.value);
   const dec = Coordinates.parseDec(positionSearchDec.value);
 
   const raValid = !isNaN(ra);
