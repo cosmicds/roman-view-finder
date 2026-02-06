@@ -23,7 +23,6 @@
       >
         <v-card
           id="position-search"
-          v-show="positionSearchWindow"
         >
           <v-card-title>Go to position</v-card-title>
           <v-form @submit.prevent>
@@ -74,14 +73,13 @@
           <pre>{{ coordinates }}</pre>
         </div>
         <icon-button
-            id="position-search"
-            @activate="positionSearchWindow = true"
-            fa-icon="magnifying-glass-location" 
-            :color="buttonColor"
-            tooltip-text="Go to location"
-            tooltip-location="end"
-          >
-          </icon-button>
+          id="position-search"
+          fa-icon="magnifying-glass-location"
+          :color="accentColor"
+          tooltip-text="Go to location"
+          tooltip-location="end"
+        >
+        </icon-button>
       </div>
       <div id="center-content">
       </div>
@@ -879,8 +877,8 @@ video {
   gap: 10px;
 }
 
-#position-search {
-  width: 200px;
+#position-search-button {
+  width: fit-content;
   padding: 10px;
 }
 </style>
