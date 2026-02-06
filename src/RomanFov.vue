@@ -66,8 +66,25 @@
               </label>
               <input
                 id="footprint-color"
+                class="bordered"
                 type="color"
                 v-model="footprintColorString"
+              />
+            </div>
+            <div id="crosshairs-row" class="centered-content">
+              <v-checkbox
+                v-model="crosshairs"
+                label="Show crosshairs"
+                density="compact"
+                hide-details
+              ></v-checkbox>
+              <input
+                v-show="crosshairs"
+                id="crosshairs-color"
+                class="bordered"
+                type="color"
+                v-model="crosshairsColor"
+                :disabled="!crosshairs"
               />
             </div>
             <div id="fill-row" class="centered-content">
@@ -86,20 +103,6 @@
                 :color="footprintColorString"
                 density="compact"
                 hide-details
-              />
-            </div>
-            <div id="crosshairs-row" class="centered-content">
-              <v-checkbox
-                v-model="crosshairs"
-                label="Show crosshairs"
-                density="compact"
-                hide-details
-              ></v-checkbox>
-              <input
-                id="crosshairs-color"
-                type="color"
-                v-model="crosshairsColor"
-                :disabled="!crosshairs"
               />
             </div>
             <v-checkbox
@@ -804,9 +807,9 @@ video {
 }
 
 .bordered {
-  border: 1px solid rgb(var(--v-theme-on-surface));
-  padding: 0.5em;
-  border-radius: 5px;
+  border: 1px solid #bbbbbb;
+  padding-inline: 2px;
+  border-radius: 4px;
 }
 
 .centered-content {
