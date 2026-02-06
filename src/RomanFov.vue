@@ -125,6 +125,7 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
+      <simbad-resolver goto/>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos/>
       </div>

@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 import { WWTComponent, wwtPinia } from "@wwtelescope/engine-pinia";
 
+import SimbadResolver from './SimbadResolver.vue';
+
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faBookOpen,
@@ -54,6 +56,7 @@ createApp(RomanFov, {
   .component('icon-button', IconButton)
   .component('funding-acknowledgement', FundingAcknowledgement)
   .component('credit-logos', CreditLogos)
+  .component('simbad-resolver', SimbadResolver)
 
   // Mount
   .mount("#app");
