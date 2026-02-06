@@ -190,12 +190,13 @@
     </div>
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
-      
-      <div id="bottom-content">
-        <div id="body-logos" v-if="!smallSize">
-          <credit-logos />
-        </div>
+
+    <div id="bottom-content">
+      <simbad-resolver goto/>
+      <div id="body-logos" v-if= "!smallSize">
+        <credit-logos/>
       </div>
+    </div>
 
 
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
