@@ -382,7 +382,7 @@ const decimalCoordinates = ref(false);
 const coordinates = computed(() => {
   return decimalCoordinates.value ? 
     `RA: ${(raRad.value * R2D).toFixed(6)}  Dec: ${(decRad.value * R2D).toFixed(6)}` :
-    `RA: ${fmtHours(raRad.value)}  Dec: ${fmtDegLat(decRad.value)}`;
+    `RA: ${fmtHours(raRad.value, 'h', 'm', 0, 's')}  Dec: ${fmtDegLat(decRad.value)}`;
 });
 const galactic = ref(false);
 const crosshairs = ref(false);
