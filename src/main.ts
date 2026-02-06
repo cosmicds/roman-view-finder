@@ -17,6 +17,8 @@ import {
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 
+import "@mdi/font/css/materialdesignicons.css";
+
 library.add(faBookOpen);
 library.add(faMagnifyingGlassLocation);
 library.add(faTimes);

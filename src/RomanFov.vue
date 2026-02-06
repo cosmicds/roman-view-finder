@@ -26,12 +26,31 @@
           <v-card
             id="position-search"
           >
-            <v-card-title>Go to position</v-card-title>
+            <v-card-title>
+              <template #default>
+                <div class="d-flex align-center">
+                  <span>Go to position</span>
+                  <v-tooltip
+                    text="RA info here"
+                  >
+                    <template #activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        size="x-small"
+                        class="pl-5"
+                      >
+                        mdi-information-variant-circle-outline
+                      </v-icon>
+                    </template>
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-card-title>
             <v-form @submit.prevent>
               <v-text-field
                 @keydown.stop
                 v-model="positionSearchRA"
-                label="RA (deg)"
+                label="RA"
                 density="compact"
                 hide-details
                 class="pt-2"
@@ -285,7 +304,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
-import { fmtDegLat, fmtHours, D2R, H2R, R2D } from "@wwtelescope/astro";
+import { fmtDegLat, fmtHours, D2R, R2D } from "@wwtelescope/astro";
 import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -523,10 +542,23 @@ function handlePositionGoToClick(isActive: Ref<boolean>) {
   }, DOUBLE_CLICK_INTERVAL_MS);
 }
 
+function parseRA(data: string): number {
+  const lower = data.toLowerCase();
+  let hours = false;
+  if (lower.indexOf('h') > -1 || lower.indexOf(':') > -1) {
+    hours = true;
+  }
+  let ra = Coordinates.parse(lower);
+  if (hours) {
+    ra *= 15;
+  }
+  return ra;
+}
+
 function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false) {
   positionSearchError.value = null;
 
-  const ra = Coordinates.parseRA(positionSearchRA.value);
+  const ra = parseRA(positionSearchRA.value ?? "");
   const dec = Coordinates.parseDec(positionSearchDec.value);
 
   const raValid = !isNaN(ra);
@@ -534,7 +566,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
 
   if (raValid && decValid) {
     store.gotoRADecZoom({
-      raRad: ra * H2R,
+      raRad: ra * D2R,
       decRad: dec * D2R,
       zoomDeg: 20,
       instant,
