@@ -33,3 +33,30 @@ export class TriangleList2D extends TriangleList {
     }
   }
 }
+
+export function splitString(target: string, delimiters: string[]): string[] {
+  const parts = [];
+  let start = 0;
+  let end = 0;
+
+  for (let i = 0; i < target.length; i++) {
+    const index = delimiters.indexOf(target[i]);
+    if (index > -1) {
+      const part = target.substring(start, end);
+      if (part.length > 0) {
+        parts.push(part);
+      }
+      start = end + 1;
+    }
+    end++;
+  }
+
+  if (end > start) {
+    const suffix = target.substring(start, end);
+    if (suffix.length > 0) {
+      parts.push(suffix);
+    }
+  }
+
+  return parts;
+}

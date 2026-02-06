@@ -14,11 +14,15 @@ import SimbadResolver from './SimbadResolver.vue';
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faBookOpen,
+  faMagnifyingGlassLocation,
   faTimes,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 
+import "@mdi/font/css/materialdesignicons.css";
+
 library.add(faBookOpen);
+library.add(faMagnifyingGlassLocation);
 library.add(faTimes);
 library.add(faVideo);
 
