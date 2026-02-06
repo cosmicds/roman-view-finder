@@ -70,6 +70,44 @@
                 v-model="footprintColorString"
               />
             </div>
+            <div id="fill-row" class="centered-content">
+              <v-checkbox
+                v-model="fill"
+                label="Fill"
+                density="compact"
+                hide-details
+              ></v-checkbox>
+              <v-slider
+                v-model="fillOpacity"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :disabled="!fill"
+                :color="footprintColorString"
+                density="compact"
+                hide-details
+              />
+            </div>
+            <div id="crosshairs-row" class="centered-content">
+              <v-checkbox
+                v-model="crosshairs"
+                label="Show crosshairs"
+                density="compact"
+                hide-details
+              ></v-checkbox>
+              <input
+                id="crosshairs-color"
+                type="color"
+                v-model="crosshairsColor"
+                :disabled="!crosshairs"
+              />
+            </div>
+            <v-checkbox
+              v-model="decimalCoordinates"
+              label="Show decimal coordinates"
+              density="compact"
+              hide-details
+            ></v-checkbox>
             <v-checkbox
               v-model="galactic"
               label="Galactic mode"
@@ -80,8 +118,6 @@
         </div>
       </div>
     </div>
-
-
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
@@ -236,7 +272,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
-import { fmtDegLat, fmtHours } from "@wwtelescope/astro";
+import { fmtDegLat, fmtHours, R2D } from "@wwtelescope/astro";
 import { Color, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -279,8 +315,8 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
   wwtNamespace: "roman-fov",
   initialCameraParams: () => {
     return {
-      raRad: 0,
-      decRad: 0,
+      raRad: 1.4612,
+      decRad: -0.09646,
       zoomDeg: 60
     };
   }
@@ -318,13 +354,26 @@ const tab = ref(0);
 const footprintColorString = ref("#00F0FF"); // #ff00b7
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
-const coordinates = computed(() => `RA: ${fmtHours(raRad.value)}  Dec: ${fmtDegLat(decRad.value)}`);
+const decimalCoordinates = ref(false);
+const coordinates = computed(() => {
+  return decimalCoordinates.value ? 
+    `RA: ${(raRad.value * R2D).toFixed(6)}  Dec: ${(decRad.value * R2D).toFixed(6)}` :
+    `RA: ${fmtHours(raRad.value)}  Dec: ${fmtDegLat(decRad.value)}`;
+});
 const galactic = ref(false);
+const crosshairs = ref(false);
+const crosshairsColor = ref("#ffffff");
+const fill = ref(false);
+const fillOpacity = ref(0.5);
+
+const settings = Settings.get_active();
 
 onMounted(() => {
   store.waitForReady().then(async () => {
 
-    Settings.get_active().set_galacticMode(galactic.value);
+    settings.set_galacticMode(galactic.value);
+    settings.set_showCrosshairs(crosshairs.value);
+    settings.set_crosshairsColor(crosshairsColor.value);
 
     const control = WWTControl.singleton;
     control.renderOneFrame();
@@ -339,7 +388,11 @@ onMounted(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     control.renderFrameCallback = function (wwt: WWTControl) {
-      drawFootprint(wwt, footprintColor.value);
+      drawFootprint(wwt, {
+        color: footprintColor.value,
+        fill: fill.value,
+        fillOpacity: fillOpacity.value,
+      });
     };
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
@@ -425,7 +478,9 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
-watch(galactic, (gal: boolean) => Settings.get_active().set_galacticMode(gal));
+watch(galactic, (gal: boolean) => settings.set_galacticMode(gal));
+watch(crosshairs, (show: boolean) => settings.set_showCrosshairs(show));
+watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
 </script>
 
 <style lang="less">
