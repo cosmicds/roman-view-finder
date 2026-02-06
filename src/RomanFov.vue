@@ -255,8 +255,14 @@ import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeybo
 import { useDisplay } from "vuetify";
 import { storeToRefs } from "pinia";
 
+import * as wwtlib from "@wwtelescope/engine";
+
 import { drawFootprint } from "./footprint";
-import { renderOneFrame } from "./wwt-hacks";
+import { renderOneFrame, splitString } from "./wwt-hacks";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error `Util.splitString` is defined
+wwtlib.Util.splitString = splitString;
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
