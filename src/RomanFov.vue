@@ -20,48 +20,51 @@
       <v-menu
         activator="#position-search-button"
         :close-on-content-click="false"
+        ref="positionSearch"
       >
-        <v-card
-          id="position-search"
-        >
-          <v-card-title>Go to position</v-card-title>
-          <v-form @submit.prevent>
-            <v-text-field
-              @keydown.stop
-              v-model="positionSearchRA"
-              label="RA (deg)"
-              density="compact"
-              hide-details
-              class="pt-2"
-            ></v-text-field>
-            <v-text-field
-              @keydown.stop
-              v-model="positionSearchDec"
-              label="Dec (deg)"
-              density="compact"
-              hide-details
-              class="pt-2"
-            ></v-text-field>
-            <v-alert
-              v-if="positionSearchError"
-              :text="positionSearchError"
-              type="error"
-              density="compact"
-              class="pt-2"
-            >
-            </v-alert>
-            <v-btn
-              @click="tryGoToSearchPosition"
-              :loading="moving"
-              :color="accentColor"
-              :disabled="!(positionSearchRA && positionSearchDec)"
-              class="mt-2"
-              text="Go"
-              type="Submit"
-              block
-            ></v-btn>
-          </v-form>
-        </v-card>
+        <template #default="{ isActive }">
+          <v-card
+            id="position-search"
+          >
+            <v-card-title>Go to position</v-card-title>
+            <v-form @submit.prevent>
+              <v-text-field
+                @keydown.stop
+                v-model="positionSearchRA"
+                label="RA (deg)"
+                density="compact"
+                hide-details
+                class="pt-2"
+              ></v-text-field>
+              <v-text-field
+                @keydown.stop
+                v-model="positionSearchDec"
+                label="Dec (deg)"
+                density="compact"
+                hide-details
+                class="pt-2"
+              ></v-text-field>
+              <v-alert
+                v-if="positionSearchError"
+                :text="positionSearchError"
+                type="error"
+                density="compact"
+                class="pt-2"
+              >
+              </v-alert>
+              <v-btn
+                @click="() => tryGoToSearchPosition(isActive)"
+                :loading="moving"
+                :color="accentColor"
+                :disabled="!(positionSearchRA && positionSearchDec)"
+                class="mt-2"
+                text="Go"
+                type="Submit"
+                block
+              ></v-btn>
+            </v-form>
+          </v-card>
+        </template>
       </v-menu>
 
 
@@ -287,6 +290,7 @@ import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
+import { VMenu } from "vuetify/components";
 import { storeToRefs } from "pinia";
 
 import * as wwtlib from "@wwtelescope/engine";
@@ -347,7 +351,6 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 
-const positionSearchWindow = ref(false);
 const positionSearchRA = ref<string | null>(null);
 const positionSearchDec = ref<string | null>(null);
 const positionSearchError = ref<string | null>(null);
@@ -501,7 +504,7 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
-function tryGoToSearchPosition() {
+function tryGoToSearchPosition(menuOpen: Ref<boolean>) {
   positionSearchError.value = null;
 
   const ra = Coordinates.parseRA(positionSearchRA.value);
@@ -517,7 +520,7 @@ function tryGoToSearchPosition() {
       zoomDeg: 20,
       instant: false,
     });
-    positionSearchWindow.value = false;
+    menuOpen.value = false;
     return;
   }
 
