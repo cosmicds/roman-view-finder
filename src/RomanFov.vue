@@ -545,7 +545,7 @@ function handlePositionGoToClick(isActive: Ref<boolean>) {
 function parseRA(data: string): number {
   const lower = data.toLowerCase();
   let hours = false;
-  if (lower.indexOf('h') > -1 || lower.indexOf(':') > -1) {
+  if (['h', ':', ' '].some(c => lower.indexOf(c))) {
     hours = true;
   }
   let ra = Coordinates.parse(lower);
