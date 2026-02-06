@@ -14,8 +14,8 @@ function _parseSesameResolver(resolverElement: Element): Exclude<ResolvedObject,
   const jradeg = resolverElement.querySelector('jradeg');
   const jdedeg = resolverElement.querySelector('jdedeg');
   return {
-    oname: oname ? oname.textContent : '<NO oname>',
-    otype: otype ? otype.textContent : '<NO otype>',
+    oname: (oname && oname.textContent) ? oname.textContent : '<NO oname>',
+    otype: (otype && otype.textContent) ? otype.textContent : '<NO otype>',
     raDeg: (jradeg && jradeg.textContent) ? parseFloat(jradeg.textContent) : NaN,
     decDeg: (jdedeg && jdedeg.textContent) ? parseFloat(jdedeg.textContent) : NaN,
   };
@@ -50,7 +50,7 @@ export async function sesameNameResolver(object_name: string, options?: SesameOp
   }
   
   let db = options?.svna || 'SNV';
-  if (options?.ignoreCache !== false) {
+  if (options?.ignoreCache) {
     db = '~' + db;
   }
   // we will always do a Simbad first search

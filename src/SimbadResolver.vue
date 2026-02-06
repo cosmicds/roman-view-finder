@@ -38,7 +38,7 @@ const name = ref<string | null>(null);
 const details = ref<ResolvedObject | null>(null);
 const errorMessage = ref('');
 
-const resolver: 'sesame' | 'simbad' = 'sesame';
+const resolver: 'sesame' | 'simbad' = 'simbad';
 
 function goTo(object: ResolvedObject) {
   if (object?.raDeg && object?.decDeg) {
