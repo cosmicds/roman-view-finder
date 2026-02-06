@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <div id="simbad-resolver">
   <v-text-field
     v-model="name"
     class="simbad-resolver-text-field"
     style="pointer-events: auto;"
     label="Object name"
-    variant="solo-filled"
+    density="compact"
+    bg-color="black"
+    variant="outlined"
     :error-messages="errorMessage"
     persistent-hint
+    hide-details
     hint="Press [Enter] to search"
     @keyup.enter="resolveName"
-  >
-    <template #prepend>
-      Go to:
-    </template>      
+  >     
   </v-text-field>
 </div>
 </template>

@@ -16,76 +16,6 @@
 
 
       <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
-      
-      <v-menu
-        activator="#position-search-button"
-        :close-on-content-click="false"
-        ref="positionSearch"
-      >
-        <template #default="{ isActive }">
-          <v-card
-            id="position-search"
-          >
-            <v-card-title>
-              <template #default>
-                <div class="d-flex align-center">
-                  <span>Go to position</span>
-                  <v-tooltip
-                    text="RA info here"
-                  >
-                    <template #activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        size="x-small"
-                        class="pl-5"
-                      >
-                        mdi-information-variant-circle-outline
-                      </v-icon>
-                    </template>
-                  </v-tooltip>
-                </div>
-              </template>
-            </v-card-title>
-            <v-form @submit.prevent>
-              <v-text-field
-                @keydown.stop
-                v-model="positionSearchRA"
-                label="RA"
-                density="compact"
-                hide-details
-                class="pt-2"
-              ></v-text-field>
-              <v-text-field
-                @keydown.stop
-                v-model="positionSearchDec"
-                label="Dec (deg)"
-                density="compact"
-                hide-details
-                class="pt-2"
-              ></v-text-field>
-              <v-alert
-                v-if="positionSearchError"
-                :text="positionSearchError"
-                type="error"
-                density="compact"
-                class="pt-2"
-              >
-              </v-alert>
-              <v-btn
-                @click="() => handlePositionGoToClick(isActive)"
-                :loading="moving"
-                :color="accentColor"
-                :disabled="!(positionSearchRA && positionSearchDec)"
-                class="mt-2"
-                text="Go"
-                type="Submit"
-                block
-              ></v-btn>
-            </v-form>
-          </v-card>
-        </template>
-      </v-menu>
-
 
       <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
       
@@ -192,7 +122,50 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
+      <div id="position-controls">
+      <div class="position-label">Go to</div>
       <simbad-resolver goto/>
+      <div class="position-label">or</div>
+        <div id="position-form">
+          <v-text-field
+            @keydown.stop
+            v-model="positionSearchRA"
+            label="RA"
+            density="compact"
+            bg-color="black"
+            variant="outlined"
+            hide-details
+          ></v-text-field>
+          <v-text-field
+            @keydown.stop
+            v-model="positionSearchDec"
+            label="Dec (deg)"
+            density="compact"
+            bg-color="black"
+            variant="outlined"
+            hide-details
+          ></v-text-field>
+        
+        <v-btn
+          @click="() => handlePositionGoToClick(ref(true))"
+          :loading="moving"
+          :color="accentColor"
+          :disabled="!(positionSearchRA && positionSearchDec)"
+          text="Go"
+          type="Submit"
+          block
+        ></v-btn>
+        </div>
+        <v-snackbar
+          v-if="positionSearchError"
+          :text="positionSearchError"
+          type="error"
+          density="compact"
+          class="pt-2"
+          location="top"
+        >
+        </v-snackbar>
+      </div>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos/>
       </div>
@@ -310,7 +283,6 @@ import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
-import { VMenu } from "vuetify/components";
 import { storeToRefs } from "pinia";
 
 import * as wwtlib from "@wwtelescope/engine";
@@ -749,17 +721,7 @@ body {
   height: auto;
 }
 
-#bottom-content {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  width: calc(100% - 2rem);
-  pointer-events: none;
-  align-items: center;
-  gap: 5px;
-}
+
 
 #body-logos {
   position: absolute;
@@ -768,7 +730,7 @@ body {
 }
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
-:focus-visible,
+:focus-visible:not(.v-field__input) ,
 button:focus-visible,
 .focus-visible,
 .v-selection-control--focus-visible .v-selection-control__input {
@@ -945,5 +907,46 @@ video {
 #position-search-button {
   width: fit-content;
   padding: 10px;
+}
+
+#bottom-content {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: calc(100% - 2rem);
+  pointer-events: auto;
+  align-items: center;
+  gap: 5px;
+}
+
+#position-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  font-family: monospace;
+}
+#simbad-resolver {
+  flex: 1 0 25%; 
+  min-width: 250px;
+}
+
+#position-form {
+  flex: 1 0 75%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: min-content;
+  gap: 1rem;
+}
+
+.position-label { 
+  font-size: 0.9em;
+  font-weight: bold;
+  width: fit-content;
+  text-wrap: nowrap;
+  white-space: nowrap;
 }
 </style>
