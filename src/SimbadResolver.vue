@@ -15,18 +15,6 @@
       Go to:
     </template>      
   </v-text-field>
-  <v-snackbar v-model="showError" color="error" location="top">
-    Object name could not be resolved
-    <template v-slot:actions>
-      <v-btn
-        color="black"
-        variant="text"
-        @click="showError = false"
-      >
-        Close
-      </v-btn>
-    </template>
-  </v-snackbar>
 </div>
 </template>
 <script lang="ts" setup>
@@ -51,17 +39,6 @@ const emits = defineEmits<{
 const name = ref<string | null>(null);
 const details = ref<ResolvedObject | null>(null);
 const errorMessage = ref('');
-const showError = ref(false);
-const timeout = 2000;
-function timeoutError()  {
-  setTimeout(()=>{
-    showError.value = false;
-  }, timeout);
-}
-watch(errorMessage, (_msg) => {
-  showError.value = true;
-  timeoutError();
-});
 
 const resolver: 'sesame' | 'simbad' = 'simbad';
 
