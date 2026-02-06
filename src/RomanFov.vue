@@ -53,7 +53,7 @@
               >
               </v-alert>
               <v-btn
-                @click="() => tryGoToSearchPosition(isActive)"
+                @click="() => handlePositionGoToClick(isActive)"
                 :loading="moving"
                 :color="accentColor"
                 :disabled="!(positionSearchRA && positionSearchDec)"
@@ -502,6 +502,25 @@ function selectSheet(sheetType: SheetType | null) {
   } else {
     sheet.value = sheetType;
   }
+}
+
+let timeout: ReturnType<typeof setTimeout> | null = null;
+let clickCount = 0;
+const DOUBLE_CLICK_INTERVAL_MS = 200;
+function handlePositionGoToClick(isActive: Ref<boolean>) {
+  clickCount += 1;
+  if (timeout != null) {
+    clearTimeout(timeout);
+  }
+  if (clickCount > 1) {
+    tryGoToSearchPosition(isActive, true);
+    clickCount = 0;
+    return;
+  }
+  timeout = setTimeout(() => {
+    tryGoToSearchPosition(isActive, false);
+    clickCount = 0;
+  }, DOUBLE_CLICK_INTERVAL_MS);
 }
 
 function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false) {
