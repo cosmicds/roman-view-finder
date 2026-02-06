@@ -284,7 +284,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
 import { fmtDegLat, fmtHours, D2R, R2D } from "@wwtelescope/astro";
 import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -504,7 +504,7 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
-function tryGoToSearchPosition(menuOpen: Ref<boolean>) {
+function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false) {
   positionSearchError.value = null;
 
   const ra = Coordinates.parseRA(positionSearchRA.value);
@@ -518,7 +518,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>) {
       raRad: ra * D2R,
       decRad: dec * D2R,
       zoomDeg: 20,
-      instant: false,
+      instant,
     });
     menuOpen.value = false;
     return;
@@ -537,7 +537,17 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>) {
   positionSearchError.value = `Your value${multiple ? 's' : ''} for ${invalid.join(' and ')} ${isAre} invalid`;
 }
 
-watch(galactic, (gal: boolean) => settings.set_galacticMode(gal));
+watch(galactic, (gal: boolean) => {
+  const raRad = store.raRad;
+  const decRad = store.decRad;
+  settings.set_galacticMode(gal);
+  store.gotoRADecZoom({
+    raRad,
+    decRad,
+    zoomDeg: store.zoomDeg,
+    instant: true,
+  });
+});
 watch(crosshairs, (show: boolean) => settings.set_showCrosshairs(show));
 watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
 </script>
