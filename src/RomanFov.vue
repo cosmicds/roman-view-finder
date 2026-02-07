@@ -171,6 +171,7 @@
             density="compact"
             bg-color="black"
             variant="outlined"
+            hint="HMS or decimal degr"
             persistent-hint
           ></v-text-field>
           <v-text-field
@@ -180,6 +181,7 @@
             density="compact"
             bg-color="black"
             variant="outlined"
+            hint="DMS or decimal degr"
             persistent-hint
           ></v-text-field>
         
@@ -623,6 +625,21 @@ function handleResolved(object: ResolvedObject) {
     positionSearchRA.value = `${raDeg / 15}`;
     positionSearchDec.value = `${decDeg}`;
   }
+}
+
+const combinedPositionInput = ref('');
+function splitCombinedInput(value: string) {
+  /**
+   * We will accept only simbad compatable formats
+   * The following writings are allowed:
+   * 20 54 05.689 +37 01 17.38
+   * 10:12:45.3-45:17:50
+   * 15h17m-11d10m
+   * 15h17+89d15
+   * 275d11m15.6954s+17d59m59.876s
+   * 12.34567h-17.87654d
+   * 350.123456d-17.33333d <=> 350.123456 -17.33333 
+   */
 }
 
 </script>
