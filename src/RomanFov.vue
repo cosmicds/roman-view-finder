@@ -347,6 +347,16 @@
                   </v-row>
                   <v-row>
                     <v-col cols="12">
+                      <h4 class="user-guide-header mt-5">Coming Soon</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
+                        </li>     
+                      </ul>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
                       <div class="credits">
                       <h4 class="user-guide-header mt-5">Credits</h4>
                       <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
