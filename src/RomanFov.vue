@@ -223,11 +223,10 @@
           location="top"
         >
         </v-snackbar>
-      <div id="body-logos" v-if= "!smallSize">
-        <credit-logos/>
-      </div>
     </div>
-
+    <div id="body-logos" v-if= "!smallSize">
+      <credit-logos/>
+    </div>
 
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -756,7 +755,7 @@ html {
 
 
   -ms-overflow-style: none;
-  // scrollbar-width: none;
+  scrollbar-width: none;
 }
 
 body {
@@ -888,6 +887,16 @@ body {
   position: absolute;
   right: 0.5em;
   bottom: 0.5em;
+
+  #logo-credits img {
+    height: 32px !important;
+  }
+
+  @media (max-height: 599px) {
+    img {
+      display: none;
+    }
+  }
 }
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
