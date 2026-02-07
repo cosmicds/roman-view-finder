@@ -178,8 +178,8 @@
         <div class="position-label">Go to</div>
         <simbad-resolver @resolved="handleResolved" class="flex-grow-1"/>
       </v-col>
-      <v-col cols="10" md="5" class="d-flex align-start ga-3 pl-0 flex-grow-1">
-      <div class="position-label">or</div>
+      <v-col cols="10" md="6" class="d-flex align-start ga-3 pl-0 flex-grow-1">
+        <div class="position-label">or</div>
         <div id="position-form">
           <v-text-field
             @keydown.stop
@@ -188,29 +188,28 @@
             density="compact"
             bg-color="black"
             variant="outlined"
-            hint="HMS or decimal degr"
+            hint="HMS or decimal degrees"
             persistent-hint
           ></v-text-field>
           <v-text-field
             @keydown.stop
             v-model="positionSearchDec"
-            label="Dec (deg)"
+            label="Dec"
             density="compact"
             bg-color="black"
             variant="outlined"
-            hint="DMS or decimal degr"
+            hint="DMS or decimal degrees"
             persistent-hint
-          ></v-text-field>
-        
-        <v-btn
-          @click="() => handlePositionGoToClick(ref(true))"
-          :loading="moving"
-          :color="accentColor"
-          :disabled="!(positionSearchRA && positionSearchDec)"
-          text="Go"
-          type="Submit"
-          block
-        ></v-btn>
+          ></v-text-field>      
+          <v-btn
+            @click="() => handlePositionGoToClick(ref(true))"
+            :loading="moving"
+            :color="borderColor"
+            text="Go"
+            type="Submit"
+            density="comfortable"
+            class="mt-1"
+          ></v-btn>
         </div>
       </v-col>
     </v-row>
@@ -1124,7 +1123,7 @@ video {
 
 #position-form {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr auto;
   gap: 1rem;
   flex-grow: 1
 }
@@ -1133,7 +1132,6 @@ video {
   font-size: 0.9em;
   font-weight: bold;
   width: fit-content;
-  text-wrap: nowrap;
   white-space: nowrap;
   padding-top: 0.5rem;
 }
