@@ -13,7 +13,7 @@ import SimbadResolver from './SimbadResolver.vue';
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faBookOpen,
+  faInfo,
   faMagnifyingGlassLocation,
   faTimes,
   faVideo,
@@ -21,7 +21,7 @@ import {
 
 import "@mdi/font/css/materialdesignicons.css";
 
-library.add(faBookOpen);
+library.add(faInfo);
 library.add(faMagnifyingGlassLocation);
 library.add(faTimes);
 library.add(faVideo);

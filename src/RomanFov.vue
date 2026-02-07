@@ -192,6 +192,17 @@
               @keydown.enter.prevent="galactic = !galactic"            ></v-checkbox>
           </details>
         </div>
+        <div>
+          <icon-button
+            id="info-icon"
+            v-model="showTextSheet"
+            fa-icon="info"
+            :color="borderColor"
+            tooltip-text="Show information"
+            tooltip-location="start"
+          >
+          </icon-button>          
+        </div>
       </div>
     </div>
 
@@ -220,90 +231,150 @@
 
       <!-- This dialog contains the informational content that is displayed when the book icon is clicked -->
 
-      <v-dialog :style="cssVars" :class="['info-sheet', `info-sheet-${infoSheetLocation}`]" id="text-info-sheet"
-        hide-overlay persistent no-click-animation absolute :scrim="false" location="bottom" v-model="showTextSheet"
-        :transition="infoSheetTransition">
-        <v-card height="100%">
-          <v-tabs v-model="tab" height="32px" :color="accentColor" :slider-color="accentColor" id="tabs" dense>
-            <v-tab class="info-tabs" tabindex="0">
-              <h3>Information</h3>
-            </v-tab>
-            <v-tab class="info-tabs" tabindex="0">
-              <h3>Using WWT</h3>
-            </v-tab>
-          </v-tabs>
-          <font-awesome-icon id="close-text-icon" class="control-icon" icon="times" size="lg"
-            @click="showTextSheet = false" @keyup.enter="showTextSheet = false" tabindex="0"></font-awesome-icon>
-          <v-window v-model="tab" id="tab-items" class="pb-2 no-bottom-border-radius">
-            <v-window-item>
-              <v-card class="no-bottom-border-radius scrollable">
-                <v-card-text class="info-text no-bottom-border-radius">
-                  Information goes here
-                  <v-spacer class="end-spacer"></v-spacer>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-            <v-window-item>
-              <v-card class="no-bottom-border-radius scrollable">
-                <v-card-text class="info-text no-bottom-border-radius">
-                  <v-container>
-                    <v-row align="center">
-                      <v-col cols="4">
-                        <v-chip label outlined>
-                          Pan
-                        </v-chip>
-                      </v-col>
-                      <v-col cols="8" class="pt-1">
-                        <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong> {{ touchscreen ? ":" : "or"
-                        }} <strong>{{ touchscreen ? ":" : "W-A-S-D" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
-                      </v-col>
-                    </v-row>
-                    <v-row align="center">
-                      <v-col cols="4">
-                        <v-chip label outlined>
-                          Zoom
-                        </v-chip>
-                      </v-col>
-                      <v-col cols="8" class="pt-1">
-                        <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? ":"
-                          : "or" }} <strong>{{ touchscreen ? ":" : "I-O" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col cols="12">
-                        <div class="credits">
-                          <h3>Credits:</h3>
-                          <h4><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank"
-                              rel="noopener noreferrer">CosmicDS</a> Vue Data Stories Team:</h4>
-                          John Lewis<br>
-                          Jon Carifio<br>
-                          Pat Udomprasert<br>
-                          Alyssa Goodman<br>
-                          Mary Dussault<br>
-                          Harry Houghton<br>
-                          Anna Nolin<br>
-                          Evaluator: Sue Sunbury<br>
-                          <br>
-                          <h4>WorldWide Telescope Team:</h4>
-                          Peter Williams<br>
-                          A. David Weigel<br>
-                          Jon Carifio<br>
-                        </div>
-                        <v-spacer class="end-spacer"></v-spacer>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col>
-                        <funding-acknowledgement />
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-          </v-window>
-        </v-card>
-      </v-dialog>
+    <v-dialog
+      :style="cssVars"
+      :class="['info-sheet', `info-sheet-${infoSheetLocation}`]"
+      id="text-info-sheet"
+      hide-overlay
+      persistent
+      no-click-animation
+      absolute
+      :scrim="false"
+      location="end"
+      v-model="showTextSheet"
+      :transition="infoSheetTransition"
+    >
+      <v-card height="100%">
+        <v-tabs
+          v-model="tab"
+          height="32px"
+          :color="textColor"
+          :slider-color="textColor"
+          id="tabs"
+          dense
+          align-tabs="end"
+        >
+          <v-tab class="info-tabs" tabindex="0"><h3>User Guide</h3></v-tab>
+        </v-tabs>
+        <font-awesome-icon
+          id="close-text-icon"
+          class="control-icon"
+          icon="times"
+          size="lg"
+          @click="showTextSheet = false"
+          @keyup.enter="showTextSheet = false"
+          tabindex="0"
+        ></font-awesome-icon>
+        <v-window v-model="tab" id="tab-items" class="pb-2 no-bottom-border-radius">
+          <v-window-item>
+            <v-card class="no-bottom-border-radius scrollable">
+              <v-card-text class="info-text no-bottom-border-radius">
+                <v-container class="pa-0">
+                  <h4 class="user-guide-header">WWT Roman View Finder</h4>
+                  <p>
+                    This <a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a> (WWT) interactive provides a view of the Roman Space Telescope footprint on the sky.
+                  </p>    
+                  <h4 class="user-guide-header mt-5">Technical Note</h4>
+                  <p>
+                    This tool can match potential targets to Roman's field of view, but it is <strong>NOT meant to be used as a precision tool</strong> for planning science observations. WWT's all-sky backgrounds may have small position offsets of 2-3". 
+                  </p>
+                  <h4 class="user-guide-header mt-5">Sky Navigation</h4>  
+                  <ul class="text-list mx-5">
+                    <li>
+                      To navigate the WWT view, use the following controls:
+                    </li>
+                  </ul>            
+                  <v-row align="center" class="mt-2 mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Pan
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? "" : "or" }}  <strong>{{ touchscreen ? "" : "W-A-S-D" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row align="center" class="mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Zoom
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? "" : "or" }} <strong>{{ touchscreen ? "" : "I-O" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row align="center" class="mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Rotate
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      {{ touchscreen ? "" : "press" }} <strong>{{ touchscreen ? "pinch and twist" : "control + click + drag" }}</strong> {{ touchscreen ? "" : "" }} <strong>{{ touchscreen ? "" : "" }}</strong> {{ touchscreen ? "" : "" }} (Keyboard option coming soon)<br>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header mt-5">Controls</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Object Labels</strong>: Display or hide the names of objects in the view.
+                        </li>
+                        <li>
+                          <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                        </li>
+                        <li>
+                          <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
+                        </li>                           
+                        <li>
+                          <strong>Opacity Slider</strong>: Display or hide the opacity slider that lets you compare the new Rubin imagery with a background sky from NOIRLab and the Digitized Sky Survey.
+                        </li>                        
+                        <li>
+                          <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
+                        </li>          
+                      </ul>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <div class="credits">
+                      <h4 class="user-guide-header mt-5">Credits</h4>
+                      <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
+                      <p>Jon Carifio</p>
+                      <p>John Lewis</p>
+                      <p>Pat Udomprasert</p>
+                      <p>Alyssa Goodman</p>
+
+                      <h5><a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
+                      <p>Jon Carifio</p>
+                      <p>Peter Williams</p>
+                      <p>David Weigel</p>
+                      </div>
+                      <v-spacer class="end-spacer"></v-spacer>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <funding-acknowledgement/>
+                    </v-col>
+                  </v-row>
+                </v-container>              
+              </v-card-text>
+            </v-card>
+          </v-window-item>
+        </v-window>
+      </v-card>
+    </v-dialog>      
 
     </div>
   </v-app>
@@ -482,6 +553,7 @@ const cssVars = computed(() => {
     "--background-color": backgroundColor.value,
     "--border-color": borderColor.value,
     "--text-color": textColor.value,
+    "--accent-color-2": footprintColorString.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
     "--info-sheet-width": infoSheetWidth.value,
@@ -499,7 +571,8 @@ const cssVars = computed(() => {
 */
 const showTextSheet = computed({
   get() {
-    return sheet.value === "text";
+    // return sheet.value === "text";
+    return true;
   },
   set(_value: boolean) {
     selectSheet("text");
@@ -611,6 +684,8 @@ watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
 </script>
 
 <style lang="less">
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
 @font-face {
   font-family: "Highway Gothic Narrow";
   src: url("./assets/HighwayGothicNarrow.ttf");
@@ -641,7 +716,8 @@ body {
   padding: 0;
   overflow: hidden;
 
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family: "Source Sans 3", Helvetica, sans-serif;
+  font-weight: regular;
 }
 
 #main-content {
@@ -851,7 +927,8 @@ video {
     }
 
     & .info-tabs h3 {
-      font-size: 10pt;
+      font-size: 1.2em;
+      color: var(--border-color);
     }
   }
 
@@ -864,9 +941,35 @@ video {
     height: var(--info-text-height);
     padding-bottom: 25px;
 
-    & a {
-      text-decoration: none;
+    p {
+      margin-block: 0.5em;
     }
+
+    a {
+      color: var(--accent-color-2)
+    }
+
+
+    h4 {
+      font-size: 1.2em;
+      color: var(--border-color);
+    }
+
+    h5 {
+      font-size: 1em;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+
+    li {
+      margin-block: 0.5em;
+    }
+  }
+
+  .bullet-icon {
+    color: var(--border-color);
+    width: 1.6em;
+    padding-right: 0.5em;
   }
 
   .close-icon {
