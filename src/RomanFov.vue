@@ -22,7 +22,7 @@
         :close-on-content-click="false"
         ref="positionSearch"
       >
-        <template>
+        <template #default>
           <v-card
             id="position-search"
           >
@@ -624,6 +624,7 @@ function handleResolved(object: ResolvedObject) {
     positionSearchDec.value = `${decDeg}`;
   }
 }
+
 </script>
 
 <style lang="less">
