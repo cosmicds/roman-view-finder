@@ -58,7 +58,10 @@
       </div>
       <div id="center-content">
         <div id="coordinates" class="info-box">
-          <pre>{{ coordinates }}</pre>
+          <div class="coordinates-content">
+            <span class="coordinate-item">RA: {{ raDisplay }}</span>
+            <span class="coordinate-item">Dec: {{ decDisplay }}</span>
+          </div>
         </div>
       </div>
 
@@ -66,9 +69,11 @@
         <div id="options">
           <icon-button
             v-if="!showOptions"
-            id="options-toggle"
+            id="options-closed"
             fa-icon="sliders"
             :color="borderColor"
+            tooltip-text="Open controls"
+            tooltip-location="start"
             @activate="showOptions = !showOptions"
             tabindex="0"
             :border="false"
@@ -81,8 +86,8 @@
             <div id="options-top-row">
               <v-select
                 id="bg-select"
-                class="mt-3"
-                width="200"
+                class="mt-3 ml-1"
+                width="165"
                 v-model="backgroundImagesetName"
                 label="Select Background"
                 :items="backgroundImagesets"
@@ -97,10 +102,12 @@
               >
               </v-select>
               <icon-button
-                id="options-toggle"
-                class="pt-0"
+                id="options-open"
+                class="pt-0 px-0"
                 fa-icon="chevron-up"
                 :color="borderColor"
+                tooltip-text="Close controls"
+                tooltip-location="start"
                 @activate="showOptions = !showOptions"
                 tabindex="0"
                 :border="false"
@@ -182,7 +189,7 @@
             v-model="showTextSheet"
             fa-icon="info"
             :color="borderColor"
-            tooltip-text="Show information"
+            tooltip-text="Show User Guide"
             tooltip-location="start"
           >
           </icon-button>          
@@ -519,10 +526,15 @@ const footprintColorString = ref("#00F0FF"); // #ff00b7
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
 const decimalCoordinates = ref(false);
-const coordinates = computed(() => {
+const raDisplay = computed(() => {
   return decimalCoordinates.value ? 
-    `RA: ${(raRad.value * R2D).toFixed(6)}  Dec: ${(decRad.value * R2D).toFixed(6)}` :
-    `RA: ${fmtHours(raRad.value, 'h', 'm', 0, 's')}  Dec: ${fmtDegLat(decRad.value)}`;
+    (raRad.value * R2D).toFixed(6) :
+    fmtHours(raRad.value, 'h', 'm', 0, 's');
+});
+const decDisplay = computed(() => {
+  return decimalCoordinates.value ? 
+    (decRad.value * R2D).toFixed(6) :
+    fmtDegLat(decRad.value);
 });
 const galactic = ref(false);
 const crosshairs = ref(false);
@@ -905,9 +917,12 @@ body {
   gap: 10px;
   align-items: flex-end;
   height: auto;
+
+  .icon-wrapper {
+    min-width: 50px;
+    border-radius: 10px;
+  }
 }
-
-
 
 #body-logos {
   position: absolute;
@@ -1107,6 +1122,7 @@ video {
     cursor: pointer;
   }
 }
+
 .info-box{
   font-size: 0.9rem;
   color: white;
@@ -1117,6 +1133,22 @@ video {
   pointer-events: auto;
   border-color: var(--border-color);
   width: 100%;  
+}
+
+#coordinates {
+
+  .coordinates-content {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1rem;
+    row-gap: 0.25rem;
+    font-family: monospace;
+    justify-content: center;
+  }
+
+  .coordinate-item {
+    white-space: nowrap;
+  }
 }
 
 .bordered {
@@ -1183,13 +1215,15 @@ video {
     padding-inline: 5px;
     padding-bottom: 5px;
   }
-
-  #bg-select {
-    padding-top: 10px;
-  }
   
   input[type="checkbox"] {
     color: var(--border-color);
   }
+
+  
+}
+
+#info-icon {
+  min-width: 52px;
 }
 </style>
