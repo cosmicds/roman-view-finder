@@ -16,6 +16,40 @@
 
 
       <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
+      
+      <v-menu
+        activator="#position-search-button"
+        :close-on-content-click="false"
+        ref="positionSearch"
+      >
+        <template>
+          <v-card
+            id="position-search"
+          >
+            <v-card-title>
+              <template #default>
+                <div class="d-flex align-center">
+                  <span>Go to position</span>
+                  <v-tooltip
+                    text="RA info here"
+                  >
+                    <template #activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        size="x-small"
+                        class="pl-5"
+                      >
+                        mdi-information-variant-circle-outline
+                      </v-icon>
+                    </template>
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-card-title>
+          </v-card>
+        </template>
+      </v-menu>
+
 
       <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
       
@@ -125,7 +159,7 @@
     <v-row id="position-layout" align="center">
       <v-col cols="10" md="auto" class="d-flex align-center ga-3" style="min-width: 250px;">
         <div class="position-label">Go to</div>
-        <simbad-resolver goto class="flex-grow-1"/>
+        <simbad-resolver @resolved="handleResolved" class="flex-grow-1"/>
       </v-col>
       <v-col cols="10" md="5" class="d-flex align-center ga-3 flex-grow-1">
       <div class="position-label">or</div>
@@ -137,7 +171,7 @@
             density="compact"
             bg-color="black"
             variant="outlined"
-            hide-details
+            persistent-hint
           ></v-text-field>
           <v-text-field
             @keydown.stop
@@ -146,7 +180,7 @@
             density="compact"
             bg-color="black"
             variant="outlined"
-            hide-details
+            persistent-hint
           ></v-text-field>
         
         <v-btn
@@ -293,6 +327,8 @@ import * as wwtlib from "@wwtelescope/engine";
 
 import { drawFootprint } from "./footprint";
 import { renderOneFrame, splitString } from "./wwt-hacks";
+
+import { ResolvedObject } from "./simbad_resolvers";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error `Util.splitString` is defined
@@ -578,6 +614,16 @@ watch(galactic, (gal: boolean) => {
 });
 watch(crosshairs, (show: boolean) => settings.set_showCrosshairs(show));
 watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
+
+
+function handleResolved(object: ResolvedObject) {
+  const {raDeg, decDeg}  = object;
+  console.log('Received', object);
+  if (raDeg && decDeg) {
+    positionSearchRA.value = `${raDeg / 15}`;
+    positionSearchDec.value = `${decDeg}`;
+  }
+}
 </script>
 
 <style lang="less">

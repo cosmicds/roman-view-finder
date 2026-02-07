@@ -10,7 +10,6 @@
     variant="outlined"
     :error-messages="errorMessage"
     persistent-hint
-    hide-details
     hint="Press [Enter] to search"
     @keyup.enter="resolveName"
   >     
@@ -68,7 +67,8 @@ function resolveName() {
           goTo(d);
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         errorMessage.value = 'Could not find object';
       });
   }
