@@ -55,40 +55,58 @@
       
     <div id="top-content">
       <div id="left-buttons">
+      </div>
+      <div id="center-content">
         <div id="coordinates" class="info-box">
           <pre>{{ coordinates }}</pre>
         </div>
-        <icon-button
-          id="position-search"
-          fa-icon="magnifying-glass-location"
-          :color="accentColor"
-          tooltip-text="Go to location"
-          tooltip-location="end"
-        >
-        </icon-button>
       </div>
-      <div id="center-content">
-      </div>
+
       <div id="right-buttons">
-        <div id="controls" class="info-box">
-          <details open>
-            <summary></summary>
-            <v-select
-              id="bg-select"
-              width="200"
-              v-model="backgroundImagesetName"
-              label="Select Background"
-              :items="backgroundImagesets"
-              :list-props="{bgColor: backgroundColorDarkest}"
-              variant="solo-filled"
-              item-title="displayName"
-              item-value="imagesetName"
-              :bg-color="backgroundColor"
-              :item-color="textColor"
-              density="compact"
-              hide-details
-            >
-            </v-select>
+        <div id="options">
+          <icon-button
+            v-if="!showOptions"
+            id="options-toggle"
+            fa-icon="sliders"
+            :color="borderColor"
+            @activate="showOptions = !showOptions"
+            tabindex="0"
+            :border="false"
+            background-color="transparent"
+          ></icon-button>
+          <div 
+            id="options-content" 
+            v-if="showOptions"
+          >
+            <div id="options-top-row">
+              <v-select
+                id="bg-select"
+                class="mt-3"
+                width="200"
+                v-model="backgroundImagesetName"
+                label="Select Background"
+                :items="backgroundImagesets"
+                :list-props="{bgColor: backgroundColorDarkest}"
+                variant="solo-filled"
+                item-title="displayName"
+                item-value="imagesetName"
+                :bg-color="backgroundColor"
+                :item-color="textColor"
+                density="compact"
+                hide-details
+              >
+              </v-select>
+              <icon-button
+                id="options-toggle"
+                class="pt-0"
+                fa-icon="chevron-up"
+                :color="borderColor"
+                @activate="showOptions = !showOptions"
+                tabindex="0"
+                :border="false"
+                background-color="transparent"
+              ></icon-button>
+            </div>
             <div class="centered-content pt-4 pb-3 pl-1">
               <label
                 for="footprint-color"
@@ -105,7 +123,7 @@
             <div id="crosshairs-row" class="centered-content">
               <v-checkbox
                 v-model="crosshairs"
-                label="Show crosshairs"
+                label="Crosshairs"
                 density="compact"
                 hide-details
                 @keydown.space.prevent="crosshairs = !crosshairs"
@@ -142,7 +160,7 @@
             </div>
             <v-checkbox
               v-model="decimalCoordinates"
-              label="Show decimal coordinates"
+              label="Decimal coordinates"
               density="compact"
               hide-details
               @keydown.space.prevent="decimalCoordinates = !decimalCoordinates"
@@ -153,9 +171,11 @@
               label="Galactic mode"
               density="compact"
               hide-details              @keydown.space.prevent="galactic = !galactic"
-              @keydown.enter.prevent="galactic = !galactic"            ></v-checkbox>
-          </details>
+              @keydown.enter.prevent="galactic = !galactic"            
+            ></v-checkbox>
+          </div>
         </div>
+
         <div>
           <icon-button
             id="info-icon"
@@ -584,7 +604,7 @@ const cssVars = computed(() => {
   };
 });
 
-
+const showOptions = ref(true);
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just
@@ -861,8 +881,9 @@ body {
   left: 1rem;
   width: calc(100% - 2rem);
   pointer-events: none;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
   align-items: flex-start;
 }
 
@@ -870,6 +891,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+#center-content {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
 }
 
 #right-buttons {
@@ -1133,6 +1160,36 @@ video {
   font-weight: bold;
   width: fit-content;
   white-space: nowrap;
-  padding-top: 0.5rem;
+  padding-top: 0.6rem;
+}
+
+#options {
+  background: black;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75em;
+  pointer-events: auto;
+
+  .icon-wrapper {
+    border: none;
+  }
+
+  #options-top-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  #options-content {
+    padding-inline: 5px;
+    padding-bottom: 5px;
+  }
+
+  #bg-select {
+    padding-top: 10px;
+  }
+  
+  input[type="checkbox"] {
+    color: var(--border-color);
+  }
 }
 </style>
