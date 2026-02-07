@@ -714,6 +714,7 @@ function handleResolved(object: ResolvedObject) {
     positionSearchRA.value = `${raDeg / 15}`;
     positionSearchDec.value = `${decDeg}`;
   }
+  handlePositionGoToClick(ref(true));
 }
 
 // const combinedPositionInput = ref('');
