@@ -317,11 +317,9 @@
                     This tool can match potential targets to Roman's field of view, but it is <strong>NOT meant to be used as a precision tool</strong> for planning science observations. WWT's all-sky backgrounds may have small position offsets of 2-3". 
                   </p>
                   <h4 class="user-guide-header mt-5">Sky Navigation</h4>  
-                  <ul class="text-list mx-5">
-                    <li>
-                      To navigate the WWT view, use the following controls:
-                    </li>
-                  </ul>            
+                  <p>
+                    To navigate the WWT view, use the following controls:                    
+                  </p>          
                   <v-row align="center" class="mt-2 mx-3">
                     <v-col cols="4">
                       <v-chip
@@ -363,40 +361,58 @@
                   </v-row>
                   <v-row>
                     <v-col cols="12">
-                      <h4 class="user-guide-header mt-5">Controls</h4>
+                      <h4 class="user-guide-header">Controls</h4>
                       <ul class="text-list mx-5">
                         <li>
-                          <strong>Object Labels</strong>: Display or hide the names of objects in the view.
+                          <strong>Select Background</strong>: Choose from DSS, 2MASS, SDSS, or unWISE.
                         </li>
                         <li>
-                          <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                          <strong>Footprint Color</strong>: Adjust as needed to contrast against the background.
                         </li>
                         <li>
-                          <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
+                          <strong>Crosshairs</strong>: Show location reported in RA/Dec display and adjust color as needed.
                         </li>                           
                         <li>
-                          <strong>Opacity Slider</strong>: Display or hide the opacity slider that lets you compare the new Rubin imagery with a background sky from NOIRLab and the Digitized Sky Survey.
+                          <strong>Fill</strong>: Fill in footprint squares and adjust opacity.
                         </li>                        
                         <li>
-                          <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
-                        </li>          
+                          <strong>Decimal coordinates</strong>: Display RA/Dec as decimals.
+                        </li>   
+                        <li>
+                          <strong>Galactic mode</strong>: rotate WWT view to follow galactic plane.
+                        </li>       
                       </ul>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col cols="12">
-                      <h4 class="user-guide-header mt-5">Coming Soon</h4>
+                      <h4 class="user-guide-header">Go to</h4>
                       <ul class="text-list mx-5">
                         <li>
-                          <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
-                        </li>     
+                          <strong>Object Name</strong>: Use SIMBAD search to resolve object names.
+                        </li>
+                        <p style="color: var(--border-color)"><strong>or</strong></p>
+                        <li>
+                          <strong>RA</strong>: Right Ascension entered in sexagesimal format (00h00m00s, 00:00:00, or 00 00 00) will be interpreted as hours. Decimal format will be interpreted as degrees.
+                        </li>
+                        <li>
+                          <strong>Dec</strong>: Declination can be entered in sexagesimal format (00&deg;00'00", 00:00:00, or 00 00 00) or in decimal format.
+                        </li>                                 
                       </ul>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Coming Soon</h4>
+                      <p>
+                        <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
+                      </p>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col cols="12">
                       <div class="credits">
-                      <h4 class="user-guide-header mt-5">Credits</h4>
+                      <h4 class="user-guide-header mt-3">Credits</h4>
                       <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
                       <p>Jon Carifio</p>
                       <p>John Lewis</p>
@@ -625,8 +641,7 @@ const showOptions = ref(true);
 */
 const showTextSheet = computed({
   get() {
-    // return sheet.value === "text";
-    return true;
+    return sheet.value === "text";
   },
   set(_value: boolean) {
     selectSheet("text");
@@ -1221,9 +1236,5 @@ video {
   }
 
   
-}
-
-#info-icon {
-  min-width: 52px;
 }
 </style>
