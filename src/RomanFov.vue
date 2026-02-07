@@ -173,12 +173,12 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
-    <v-row id="position-layout" align="start">
-      <v-col cols="10" md="auto" class="d-flex align-start ga-3" style="min-width: 250px;">
+    <v-row id="position-layout" align="start" justify="center">
+      <v-col cols="10" md="auto" class="d-flex align-start ga-3 pl-0" style="min-width: 250px;">
         <div class="position-label">Go to</div>
         <simbad-resolver @resolved="handleResolved" class="flex-grow-1"/>
       </v-col>
-      <v-col cols="10" md="5" class="d-flex align-start ga-3 flex-grow-1">
+      <v-col cols="10" md="5" class="d-flex align-start ga-3 pl-0 flex-grow-1">
       <div class="position-label">or</div>
         <div id="position-form">
           <v-text-field
