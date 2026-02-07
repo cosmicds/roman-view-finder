@@ -122,7 +122,6 @@ export async function simbadResolveCoordinates(raDeg, decDeg, radiusArcSec = 60,
   const res = await fetch(url);
   const text = await res.text();
   const out =  parseSimbadASCII(text);
-  console.log(out);
   if (!out.oname) {
     throw new Error('Could not resolve coordinates');
   }
@@ -195,8 +194,8 @@ export async function simbadNameResolver(name) {
   const res = await fetch(url);
   const text = await res.text();
   const out =  parseSimbadASCII(text);
-  console.log(out);
-  if (!out.name) {
+  if (!out.oname) {
+    console.error(`The name is bad ${out.oname}`);
     throw new Error('Could not resolve name');
   }
   return out;

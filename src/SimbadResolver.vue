@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <div id="simbad-resolver">
   <v-text-field
     v-model="name"
     class="simbad-resolver-text-field"
     style="pointer-events: auto;"
     label="Object name"
-    variant="solo-filled"
+    density="compact"
+    bg-color="black"
+    variant="outlined"
     :error-messages="errorMessage"
     persistent-hint
     hint="Press [Enter] to search"
     @keyup.enter="resolveName"
-  >
-    <template #prepend>
-      Go to:
-    </template>      
+    @keydown.stop
+  >     
   </v-text-field>
 </div>
 </template>
@@ -68,7 +68,8 @@ function resolveName() {
           goTo(d);
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         errorMessage.value = 'Could not find object';
       });
   }

@@ -22,7 +22,7 @@
         :close-on-content-click="false"
         ref="positionSearch"
       >
-        <template #default="{ isActive }">
+        <template #default>
           <v-card
             id="position-search"
           >
@@ -46,42 +46,6 @@
                 </div>
               </template>
             </v-card-title>
-            <v-form @submit.prevent>
-              <v-text-field
-                @keydown.stop
-                v-model="positionSearchRA"
-                label="RA"
-                density="compact"
-                hide-details
-                class="pt-2"
-              ></v-text-field>
-              <v-text-field
-                @keydown.stop
-                v-model="positionSearchDec"
-                label="Dec (deg)"
-                density="compact"
-                hide-details
-                class="pt-2"
-              ></v-text-field>
-              <v-alert
-                v-if="positionSearchError"
-                :text="positionSearchError"
-                type="error"
-                density="compact"
-                class="pt-2"
-              >
-              </v-alert>
-              <v-btn
-                @click="() => handlePositionGoToClick(isActive)"
-                :loading="moving"
-                :color="accentColor"
-                :disabled="!(positionSearchRA && positionSearchDec)"
-                class="mt-2"
-                text="Go"
-                type="Submit"
-                block
-              ></v-btn>
-            </v-form>
           </v-card>
         </template>
       </v-menu>
@@ -192,7 +156,56 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
-      <simbad-resolver goto/>
+    <v-row id="position-layout" align="center">
+      <v-col cols="10" md="auto" class="d-flex align-center ga-3" style="min-width: 250px;">
+        <div class="position-label">Go to</div>
+        <simbad-resolver @resolved="handleResolved" class="flex-grow-1"/>
+      </v-col>
+      <v-col cols="10" md="5" class="d-flex align-center ga-3 flex-grow-1">
+      <div class="position-label">or</div>
+        <div id="position-form">
+          <v-text-field
+            @keydown.stop
+            v-model="positionSearchRA"
+            label="RA"
+            density="compact"
+            bg-color="black"
+            variant="outlined"
+            hint="HMS or decimal degr"
+            persistent-hint
+          ></v-text-field>
+          <v-text-field
+            @keydown.stop
+            v-model="positionSearchDec"
+            label="Dec (deg)"
+            density="compact"
+            bg-color="black"
+            variant="outlined"
+            hint="DMS or decimal degr"
+            persistent-hint
+          ></v-text-field>
+        
+        <v-btn
+          @click="() => handlePositionGoToClick(ref(true))"
+          :loading="moving"
+          :color="accentColor"
+          :disabled="!(positionSearchRA && positionSearchDec)"
+          text="Go"
+          type="Submit"
+          block
+        ></v-btn>
+        </div>
+      </v-col>
+    </v-row>
+        <v-snackbar
+          v-if="positionSearchError"
+          :text="positionSearchError"
+          type="error"
+          density="compact"
+          class="pt-2"
+          location="top"
+        >
+        </v-snackbar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos/>
       </div>
@@ -310,13 +323,14 @@ import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
-import { VMenu } from "vuetify/components";
 import { storeToRefs } from "pinia";
 
 import * as wwtlib from "@wwtelescope/engine";
 
 import { drawFootprint } from "./footprint";
 import { renderOneFrame, splitString } from "./wwt-hacks";
+
+import { ResolvedObject } from "./simbad_resolvers";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error `Util.splitString` is defined
@@ -602,6 +616,32 @@ watch(galactic, (gal: boolean) => {
 });
 watch(crosshairs, (show: boolean) => settings.set_showCrosshairs(show));
 watch(crosshairsColor, (color: string) => settings.set_crosshairsColor(color));
+
+
+function handleResolved(object: ResolvedObject) {
+  const {raDeg, decDeg}  = object;
+  console.log('Received', object);
+  if (raDeg && decDeg) {
+    positionSearchRA.value = `${raDeg / 15}`;
+    positionSearchDec.value = `${decDeg}`;
+  }
+}
+
+// const combinedPositionInput = ref('');
+// function splitCombinedInput(value: string) {
+//   /**
+//    * We will accept only simbad compatable formats
+//    * The following writings are allowed:
+//    * 20 54 05.689 +37 01 17.38
+//    * 10:12:45.3-45:17:50
+//    * 15h17m-11d10m
+//    * 15h17+89d15
+//    * 275d11m15.6954s+17d59m59.876s
+//    * 12.34567h-17.87654d
+//    * 350.123456d-17.33333d <=> 350.123456 -17.33333 
+//    */
+// }
+
 </script>
 
 <style lang="less">
@@ -749,17 +789,7 @@ body {
   height: auto;
 }
 
-#bottom-content {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  width: calc(100% - 2rem);
-  pointer-events: none;
-  align-items: center;
-  gap: 5px;
-}
+
 
 #body-logos {
   position: absolute;
@@ -768,7 +798,7 @@ body {
 }
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
-:focus-visible,
+:focus-visible:not(.v-field__input) ,
 button:focus-visible,
 .focus-visible,
 .v-selection-control--focus-visible .v-selection-control__input {
@@ -945,5 +975,32 @@ video {
 #position-search-button {
   width: fit-content;
   padding: 10px;
+}
+
+#bottom-content {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  width: calc(100% - 2rem);
+  pointer-events: auto;
+}
+
+#position-layout {
+  font-family: monospace;
+}
+
+#position-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  flex-grow: 1
+}
+
+.position-label { 
+  font-size: 0.9em;
+  font-weight: bold;
+  width: fit-content;
+  text-wrap: nowrap;
+  white-space: nowrap;
 }
 </style>
