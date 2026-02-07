@@ -12,6 +12,7 @@
     persistent-hint
     hint="Press [Enter] to search"
     @keyup.enter="resolveName"
+    @keydown.stop
   >     
   </v-text-field>
 </div>
