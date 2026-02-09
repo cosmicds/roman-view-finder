@@ -14,45 +14,6 @@
         </div>
       </transition>
 
-
-      <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
-      
-      <v-menu
-        activator="#position-search-button"
-        :close-on-content-click="false"
-        ref="positionSearch"
-      >
-        <template #default>
-          <v-card
-            id="position-search"
-          >
-            <v-card-title>
-              <template #default>
-                <div class="d-flex align-center">
-                  <span>Go to position</span>
-                  <v-tooltip
-                    text="RA info here"
-                  >
-                    <template #activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        size="x-small"
-                        class="pl-5"
-                      >
-                        mdi-information-variant-circle-outline
-                      </v-icon>
-                    </template>
-                  </v-tooltip>
-                </div>
-              </template>
-            </v-card-title>
-          </v-card>
-        </template>
-      </v-menu>
-
-
-      <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
-      
     <div id="top-content">
       <div id="left-buttons">
       </div>
@@ -1176,11 +1137,6 @@ video {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-#position-search-button {
-  width: fit-content;
-  padding: 10px;
 }
 
 #bottom-content {
