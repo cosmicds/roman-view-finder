@@ -16,6 +16,7 @@ import {
   faInfo,
   faChevronUp,
   faSliders,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 import "@mdi/font/css/materialdesignicons.css";
@@ -23,6 +24,7 @@ import "@mdi/font/css/materialdesignicons.css";
 library.add(faInfo);
 library.add(faChevronUp);
 library.add(faSliders);
+library.add(faTimes);
 
 /** v-hide directive taken from https://www.ryansouthgate.com/2020/01/30/vue-js-v-hide-element-whilst-keeping-occupied-space/ */
 // Extract the function out, up here, so I'm not writing it twice
