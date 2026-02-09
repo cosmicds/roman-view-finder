@@ -55,40 +55,65 @@
       
     <div id="top-content">
       <div id="left-buttons">
-        <div id="coordinates" class="info-box">
-          <pre>{{ coordinates }}</pre>
-        </div>
-        <icon-button
-          id="position-search"
-          fa-icon="magnifying-glass-location"
-          :color="accentColor"
-          tooltip-text="Go to location"
-          tooltip-location="end"
-        >
-        </icon-button>
       </div>
       <div id="center-content">
+        <div id="coordinates" class="info-box">
+          <div class="coordinates-content">
+            <span class="coordinate-item">RA: {{ raDisplay }}</span>
+            <span class="coordinate-item">Dec: {{ decDisplay }}</span>
+          </div>
+        </div>
       </div>
+
       <div id="right-buttons">
-        <div id="controls" class="info-box">
-          <details open>
-            <summary></summary>
-            <v-select
-              id="bg-select"
-              width="200"
-              v-model="backgroundImagesetName"
-              label="Select Background"
-              :items="backgroundImagesets"
-              :list-props="{bgColor: backgroundColorDarkest}"
-              variant="solo-filled"
-              item-title="displayName"
-              item-value="imagesetName"
-              :bg-color="backgroundColor"
-              :item-color="textColor"
-              density="compact"
-              hide-details
-            >
-            </v-select>
+        <div id="options">
+          <icon-button
+            v-if="!showOptions"
+            id="options-closed"
+            fa-icon="sliders"
+            :color="borderColor"
+            tooltip-text="Open controls"
+            tooltip-location="start"
+            @activate="showOptions = !showOptions"
+            tabindex="0"
+            :border="false"
+            background-color="transparent"
+          ></icon-button>
+          <div 
+            id="options-content" 
+            v-if="showOptions"
+          >
+            <div id="options-top-row">
+              <v-select
+                id="bg-select"
+                class="mt-3 ml-1"
+                width="165"
+                v-model="backgroundImagesetName"
+                label="Select Background"
+                :items="backgroundImagesets"
+                :list-props="{bgColor: backgroundColorDarkest}"
+                variant="solo-filled"
+                item-title="displayName"
+                item-value="imagesetName"
+                :bg-color="backgroundColor"
+                :item-color="textColor"
+                density="compact"
+                hide-details
+              >
+              </v-select>
+              <icon-button
+                id="options-open"
+                class="pt-0 px-0"
+                fa-icon="chevron-up"
+                :color="borderColor"
+                tooltip-text="Close controls"
+                tooltip-location="start"
+                @activate="showOptions = !showOptions"
+                tabindex="0"
+                :border="false"
+                background-color="transparent"
+              ></icon-button>
+            </div>
             <div class="centered-content pt-4 pb-3 pl-1">
               <label
                 for="footprint-color"
@@ -105,9 +130,11 @@
             <div id="crosshairs-row" class="centered-content">
               <v-checkbox
                 v-model="crosshairs"
-                label="Show crosshairs"
+                label="Crosshairs"
                 density="compact"
                 hide-details
+                @keydown.space.prevent="crosshairs = !crosshairs"
+                @keydown.enter.prevent="crosshairs = !crosshairs"
               ></v-checkbox>
               <input
                 v-show="crosshairs"
@@ -124,6 +151,8 @@
                 label="Fill"
                 density="compact"
                 hide-details
+                @keydown.space.prevent="fill = !fill"
+                @keydown.enter.prevent="fill = !fill"
               ></v-checkbox>
               <v-slider
                 v-model="fillOpacity"
@@ -138,17 +167,32 @@
             </div>
             <v-checkbox
               v-model="decimalCoordinates"
-              label="Show decimal coordinates"
+              label="Decimal coordinates"
               density="compact"
               hide-details
+              @keydown.space.prevent="decimalCoordinates = !decimalCoordinates"
+              @keydown.enter.prevent="decimalCoordinates = !decimalCoordinates"
             ></v-checkbox>
             <v-checkbox
               v-model="galactic"
               label="Galactic mode"
               density="compact"
-              hide-details
+              hide-details              @keydown.space.prevent="galactic = !galactic"
+              @keydown.enter.prevent="galactic = !galactic"            
             ></v-checkbox>
-          </details>
+          </div>
+        </div>
+
+        <div>
+          <icon-button
+            id="info-icon"
+            v-model="showTextSheet"
+            fa-icon="info"
+            :color="borderColor"
+            tooltip-text="Show User Guide"
+            tooltip-location="start"
+          >
+          </icon-button>          
         </div>
       </div>
     </div>
@@ -156,13 +200,13 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
-    <v-row id="position-layout" align="center">
-      <v-col cols="10" md="auto" class="d-flex align-center ga-3" style="min-width: 250px;">
+    <v-row id="position-layout" align="start" justify="center">
+      <v-col cols="10" md="auto" class="d-flex align-start ga-3 pl-0" style="min-width: 250px;">
         <div class="position-label">Go to</div>
         <simbad-resolver @resolved="handleResolved" class="flex-grow-1"/>
       </v-col>
-      <v-col cols="10" md="5" class="d-flex align-center ga-3 flex-grow-1">
-      <div class="position-label">or</div>
+      <v-col cols="10" md="6" class="d-flex align-start ga-3 pl-0 flex-grow-1">
+        <div class="position-label">or</div>
         <div id="position-form">
           <v-text-field
             @keydown.stop
@@ -171,29 +215,28 @@
             density="compact"
             bg-color="black"
             variant="outlined"
-            hint="HMS or decimal degr"
+            hint="HMS or decimal degrees"
             persistent-hint
           ></v-text-field>
           <v-text-field
             @keydown.stop
             v-model="positionSearchDec"
-            label="Dec (deg)"
+            label="Dec"
             density="compact"
             bg-color="black"
             variant="outlined"
-            hint="DMS or decimal degr"
+            hint="DMS or decimal degrees"
             persistent-hint
-          ></v-text-field>
-        
-        <v-btn
-          @click="() => handlePositionGoToClick(ref(true))"
-          :loading="moving"
-          :color="accentColor"
-          :disabled="!(positionSearchRA && positionSearchDec)"
-          text="Go"
-          type="Submit"
-          block
-        ></v-btn>
+          ></v-text-field>      
+          <v-btn
+            @click="() => handlePositionGoToClick(ref(true))"
+            :loading="moving"
+            :color="borderColor"
+            text="Go"
+            type="Submit"
+            density="comfortable"
+            class="mt-1"
+          ></v-btn>
         </div>
       </v-col>
     </v-row>
@@ -206,11 +249,10 @@
           location="top"
         >
         </v-snackbar>
-      <div id="body-logos" v-if= "!smallSize">
-        <credit-logos/>
-      </div>
     </div>
-
+    <div id="body-logos" v-if= "!smallSize">
+      <credit-logos/>
+    </div>
 
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -227,90 +269,176 @@
 
       <!-- This dialog contains the informational content that is displayed when the book icon is clicked -->
 
-      <v-dialog :style="cssVars" :class="['info-sheet', `info-sheet-${infoSheetLocation}`]" id="text-info-sheet"
-        hide-overlay persistent no-click-animation absolute :scrim="false" location="bottom" v-model="showTextSheet"
-        :transition="infoSheetTransition">
-        <v-card height="100%">
-          <v-tabs v-model="tab" height="32px" :color="accentColor" :slider-color="accentColor" id="tabs" dense>
-            <v-tab class="info-tabs" tabindex="0">
-              <h3>Information</h3>
-            </v-tab>
-            <v-tab class="info-tabs" tabindex="0">
-              <h3>Using WWT</h3>
-            </v-tab>
-          </v-tabs>
-          <font-awesome-icon id="close-text-icon" class="control-icon" icon="times" size="lg"
-            @click="showTextSheet = false" @keyup.enter="showTextSheet = false" tabindex="0"></font-awesome-icon>
-          <v-window v-model="tab" id="tab-items" class="pb-2 no-bottom-border-radius">
-            <v-window-item>
-              <v-card class="no-bottom-border-radius scrollable">
-                <v-card-text class="info-text no-bottom-border-radius">
-                  Information goes here
-                  <v-spacer class="end-spacer"></v-spacer>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-            <v-window-item>
-              <v-card class="no-bottom-border-radius scrollable">
-                <v-card-text class="info-text no-bottom-border-radius">
-                  <v-container>
-                    <v-row align="center">
-                      <v-col cols="4">
-                        <v-chip label outlined>
-                          Pan
-                        </v-chip>
-                      </v-col>
-                      <v-col cols="8" class="pt-1">
-                        <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong> {{ touchscreen ? ":" : "or"
-                        }} <strong>{{ touchscreen ? ":" : "W-A-S-D" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
-                      </v-col>
-                    </v-row>
-                    <v-row align="center">
-                      <v-col cols="4">
-                        <v-chip label outlined>
-                          Zoom
-                        </v-chip>
-                      </v-col>
-                      <v-col cols="8" class="pt-1">
-                        <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? ":"
-                          : "or" }} <strong>{{ touchscreen ? ":" : "I-O" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col cols="12">
-                        <div class="credits">
-                          <h3>Credits:</h3>
-                          <h4><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank"
-                              rel="noopener noreferrer">CosmicDS</a> Vue Data Stories Team:</h4>
-                          John Lewis<br>
-                          Jon Carifio<br>
-                          Pat Udomprasert<br>
-                          Alyssa Goodman<br>
-                          Mary Dussault<br>
-                          Harry Houghton<br>
-                          Anna Nolin<br>
-                          Evaluator: Sue Sunbury<br>
-                          <br>
-                          <h4>WorldWide Telescope Team:</h4>
-                          Peter Williams<br>
-                          A. David Weigel<br>
-                          Jon Carifio<br>
-                        </div>
-                        <v-spacer class="end-spacer"></v-spacer>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col>
-                        <funding-acknowledgement />
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-          </v-window>
-        </v-card>
-      </v-dialog>
+    <v-dialog
+      :style="cssVars"
+      :class="['info-sheet', `info-sheet-${infoSheetLocation}`]"
+      id="text-info-sheet"
+      hide-overlay
+      persistent
+      no-click-animation
+      absolute
+      :scrim="false"
+      location="end"
+      v-model="showTextSheet"
+      :transition="infoSheetTransition"
+    >
+      <v-card height="100%">
+        <v-tabs
+          v-model="tab"
+          height="32px"
+          :color="textColor"
+          :slider-color="textColor"
+          id="tabs"
+          dense
+          align-tabs="end"
+        >
+          <v-tab class="info-tabs" tabindex="0"><h3>User Guide</h3></v-tab>
+        </v-tabs>
+        <font-awesome-icon
+          id="close-text-icon"
+          class="control-icon"
+          icon="times"
+          size="lg"
+          @click="showTextSheet = false"
+          @keyup.enter="showTextSheet = false"
+          tabindex="0"
+        ></font-awesome-icon>
+        <v-window v-model="tab" id="tab-items" class="pb-2 no-bottom-border-radius">
+          <v-window-item>
+            <v-card class="no-bottom-border-radius scrollable">
+              <v-card-text class="info-text no-bottom-border-radius">
+                <v-container class="pa-0">
+                  <h4 class="user-guide-header">WWT Roman View Finder</h4>
+                  <p>
+                    This <a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a> (WWT) interactive provides a view of the Roman Space Telescope footprint on the sky.
+                  </p>    
+                  <h4 class="user-guide-header mt-5">Technical Note</h4>
+                  <p>
+                    This tool can match potential targets to Roman's field of view, but it is <strong>NOT meant to be used as a precision tool</strong> for planning science observations. WWT's all-sky backgrounds may have small position offsets of 2-3". 
+                  </p>
+                  <h4 class="user-guide-header mt-5">Sky Navigation</h4>  
+                  <p>
+                    To navigate the WWT view, use the following controls:                    
+                  </p>          
+                  <v-row align="center" class="mt-2 mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Pan
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? "" : "or" }}  <strong>{{ touchscreen ? "" : "W-A-S-D" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row align="center" class="mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Zoom
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? "" : "or" }} <strong>{{ touchscreen ? "" : "I-O" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row align="center" class="mx-3">
+                    <v-col cols="4">
+                      <v-chip
+                        label
+                        outlined
+                      >
+                        Rotate
+                      </v-chip>
+                    </v-col>
+                    <v-col cols="8" class="pt-1">
+                      {{ touchscreen ? "" : "press" }} <strong>{{ touchscreen ? "pinch and twist" : "control + click + drag" }}</strong> {{ touchscreen ? "" : "" }} <strong>{{ touchscreen ? "" : "" }}</strong> {{ touchscreen ? "" : "" }} (Keyboard option coming soon)<br>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Controls</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Select Background</strong>: Choose from DSS, 2MASS, SDSS, or unWISE.
+                        </li>
+                        <li>
+                          <strong>Footprint Color</strong>: Adjust as needed to contrast against the background.
+                        </li>
+                        <li>
+                          <strong>Crosshairs</strong>: Show location reported in RA/Dec display and adjust color as needed.
+                        </li>                           
+                        <li>
+                          <strong>Fill</strong>: Fill in footprint squares and adjust opacity.
+                        </li>                        
+                        <li>
+                          <strong>Decimal coordinates</strong>: Display RA/Dec as decimals.
+                        </li>   
+                        <li>
+                          <strong>Galactic mode</strong>: rotate WWT view to follow galactic plane.
+                        </li>       
+                      </ul>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Go to</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Object Name</strong>: Use SIMBAD search to resolve object names.
+                        </li>
+                        <p style="color: var(--border-color)"><strong>or</strong></p>
+                        <li>
+                          <strong>RA</strong>: Right Ascension entered in sexagesimal format (00h00m00s, 00:00:00, or 00 00 00) will be interpreted as hours. Decimal format will be interpreted as degrees.
+                        </li>
+                        <li>
+                          <strong>Dec</strong>: Declination can be entered in sexagesimal format (00&deg;00'00", 00:00:00, or 00 00 00) or in decimal format.
+                        </li>                                 
+                      </ul>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Coming Soon</h4>
+                      <p>
+                        <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
+                      </p>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <div class="credits">
+                      <h4 class="user-guide-header mt-3">Credits</h4>
+                      <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
+                      <p>Jon Carifio</p>
+                      <p>John Lewis</p>
+                      <p>Pat Udomprasert</p>
+                      <p>Alyssa Goodman</p>
+
+                      <h5><a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
+                      <p>Jon Carifio</p>
+                      <p>Peter Williams</p>
+                      <p>David Weigel</p>
+                      </div>
+                      <v-spacer class="end-spacer"></v-spacer>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <funding-acknowledgement/>
+                    </v-col>
+                  </v-row>
+                </v-container>              
+              </v-card-text>
+            </v-card>
+          </v-window-item>
+        </v-window>
+      </v-card>
+    </v-dialog>      
 
     </div>
   </v-app>
@@ -414,10 +542,15 @@ const footprintColorString = ref("#00F0FF"); // #ff00b7
 const footprintColor = computed(() => Color.load(footprintColorString.value));
 
 const decimalCoordinates = ref(false);
-const coordinates = computed(() => {
+const raDisplay = computed(() => {
   return decimalCoordinates.value ? 
-    `RA: ${(raRad.value * R2D).toFixed(6)}  Dec: ${(decRad.value * R2D).toFixed(6)}` :
-    `RA: ${fmtHours(raRad.value, 'h', 'm', 0, 's')}  Dec: ${fmtDegLat(decRad.value)}`;
+    (raRad.value * R2D).toFixed(6) :
+    fmtHours(raRad.value, 'h', 'm', 0, 's');
+});
+const decDisplay = computed(() => {
+  return decimalCoordinates.value ? 
+    (decRad.value * R2D).toFixed(6) :
+    fmtDegLat(decRad.value);
 });
 const galactic = ref(false);
 const crosshairs = ref(false);
@@ -490,6 +623,7 @@ const cssVars = computed(() => {
     "--background-color": backgroundColor.value,
     "--border-color": borderColor.value,
     "--text-color": textColor.value,
+    "--accent-color-2": footprintColorString.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
     "--info-sheet-width": infoSheetWidth.value,
@@ -498,7 +632,7 @@ const cssVars = computed(() => {
   };
 });
 
-
+const showOptions = ref(true);
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just
@@ -625,6 +759,7 @@ function handleResolved(object: ResolvedObject) {
     positionSearchRA.value = `${raDeg / 15}`;
     positionSearchDec.value = `${decDeg}`;
   }
+  handlePositionGoToClick(ref(true));
 }
 
 // const combinedPositionInput = ref('');
@@ -645,6 +780,8 @@ function handleResolved(object: ResolvedObject) {
 </script>
 
 <style lang="less">
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
 @font-face {
   font-family: "Highway Gothic Narrow";
   src: url("./assets/HighwayGothicNarrow.ttf");
@@ -664,7 +801,7 @@ html {
 
 
   -ms-overflow-style: none;
-  // scrollbar-width: none;
+  scrollbar-width: none;
 }
 
 body {
@@ -675,7 +812,8 @@ body {
   padding: 0;
   overflow: hidden;
 
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family: "Source Sans 3", Helvetica, sans-serif;
+  font-weight: regular;
 }
 
 #main-content {
@@ -770,8 +908,9 @@ body {
   left: 1rem;
   width: calc(100% - 2rem);
   pointer-events: none;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
   align-items: flex-start;
 }
 
@@ -781,30 +920,53 @@ body {
   gap: 10px;
 }
 
+#center-content {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
 #right-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: flex-end;
   height: auto;
+
+  .icon-wrapper {
+    min-width: 50px;
+    border-radius: 10px;
+  }
 }
-
-
 
 #body-logos {
   position: absolute;
   right: 0.5em;
   bottom: 0.5em;
+
+  #logo-credits img {
+    height: 32px !important;
+  }
+
+  @media (max-height: 599px) {
+    img {
+      display: none;
+    }
+  }
 }
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
-:focus-visible:not(.v-field__input) ,
-button:focus-visible,
-.focus-visible,
-.v-selection-control--focus-visible .v-selection-control__input {
+// checkbox will only get oreo styling when user tabs by keyboard.
+:focus-visible, .v-checkbox .v-selection-control__input:has(:focus-visible) {
   outline: 9px double white !important;
   box-shadow: 0 0 0 6px black !important;
   border-radius: .125rem;
+}
+
+// Reduce focus indicator for text input fields only (they have their own built-in indicators)
+.v-text-field input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .video-wrapper {
@@ -871,7 +1033,8 @@ video {
     }
 
     & .info-tabs h3 {
-      font-size: 10pt;
+      font-size: 1.2em;
+      color: var(--border-color);
     }
   }
 
@@ -884,9 +1047,35 @@ video {
     height: var(--info-text-height);
     padding-bottom: 25px;
 
-    & a {
-      text-decoration: none;
+    p {
+      margin-block: 0.5em;
     }
+
+    a {
+      color: var(--accent-color-2)
+    }
+
+
+    h4 {
+      font-size: 1.2em;
+      color: var(--border-color);
+    }
+
+    h5 {
+      font-size: 1em;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+
+    li {
+      margin-block: 0.5em;
+    }
+  }
+
+  .bullet-icon {
+    color: var(--border-color);
+    width: 1.6em;
+    padding-right: 0.5em;
   }
 
   .close-icon {
@@ -948,6 +1137,7 @@ video {
     cursor: pointer;
   }
 }
+
 .info-box{
   font-size: 0.9rem;
   color: white;
@@ -958,6 +1148,22 @@ video {
   pointer-events: auto;
   border-color: var(--border-color);
   width: 100%;  
+}
+
+#coordinates {
+
+  .coordinates-content {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1rem;
+    row-gap: 0.25rem;
+    font-family: monospace;
+    justify-content: center;
+  }
+
+  .coordinate-item {
+    white-space: nowrap;
+  }
 }
 
 .bordered {
@@ -991,7 +1197,7 @@ video {
 
 #position-form {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr auto;
   gap: 1rem;
   flex-grow: 1
 }
@@ -1000,7 +1206,35 @@ video {
   font-size: 0.9em;
   font-weight: bold;
   width: fit-content;
-  text-wrap: nowrap;
   white-space: nowrap;
+  padding-top: 0.6rem;
+}
+
+#options {
+  background: black;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75em;
+  pointer-events: auto;
+
+  .icon-wrapper {
+    border: none;
+  }
+
+  #options-top-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  #options-content {
+    padding-inline: 5px;
+    padding-bottom: 5px;
+  }
+  
+  input[type="checkbox"] {
+    color: var(--border-color);
+  }
+
+  
 }
 </style>
