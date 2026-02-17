@@ -155,6 +155,23 @@
           >
           </icon-button>          
         </div>
+        <div>
+          <icon-button
+            id="clipboard-icon"
+            fa-icon="fa-clipboard"
+            :color="borderColor"
+            tooltip-text="Copy share URL"
+            tooltip-location="start"
+            @activate="copyURLToClipboard"
+          >
+          </icon-button>
+          <v-snackbar
+            v-model="snackbar"
+            :color="snackbarColor"
+          >
+            {{ snackbarMessage }}
+          </v-snackbar>
+        </div>
       </div>
     </div>
 
@@ -520,6 +537,10 @@ const fill = ref(false);
 const fillOpacity = ref(0.5);
 const moving = ref(false);
 
+const snackbar = ref(false);
+const snackbarColor = ref<"error" | "success">("success");
+const snackbarMessage = ref("");
+
 const settings = Settings.get_active();
 
 onMounted(() => {
@@ -533,8 +554,24 @@ onMounted(() => {
     control.renderOneFrame();
     control.renderOneFrame = renderOneFrame.bind(control);
 
+    const cameraParams = { ...props.initialCameraParams };
+    const query = new URLSearchParams(window.location.search);
+
+    const paramNames: (keyof CameraParams)[] = ["raRad", "decRad", "zoomDeg", "rollRad"] as const;
+    for (const name of paramNames) {
+      const valueString = query.get(name);
+      if (valueString == null) {
+        continue;
+      }
+      const value = parseFloat(valueString);
+      if (!isNaN(value)) {
+        cameraParams[name] = value;
+      }
+    }
+    console.log(cameraParams);
+
     store.gotoRADecZoom({
-      ...props.initialCameraParams,
+      ...cameraParams,
       instant: true
     }).then(() => positionSet.value = true);
 
@@ -696,6 +733,26 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
   const multiple = invalid.length > 1;
   const isAre = multiple ? "are" : "is";
   positionSearchError.value = `Your value${multiple ? 's' : ''} for ${invalid.join(' and ')} ${isAre} invalid`;
+}
+
+function shareURL(): string {
+  const url = new URL(window.location.href);
+  url.search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}`;  
+  return url.href;
+}
+
+function copyURLToClipboard() {
+  navigator.clipboard
+    .writeText(shareURL())
+    .then(() => {
+      snackbarColor.value = "success";
+      snackbarMessage.value = "Shareable URL copied to clipboard";
+    })
+    .catch((_err) => {
+      snackbarColor.value = "error";
+      snackbarMessage.value = "Failed to copy share URL to clipboard";
+    })
+    .finally(() => snackbar.value = true);
 }
 
 watch(galactic, (gal: boolean) => {
