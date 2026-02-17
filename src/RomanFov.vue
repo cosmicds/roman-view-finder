@@ -466,6 +466,7 @@ const backgroundImagesetName = computed({
   }
 });
 
+
 useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
@@ -569,8 +570,6 @@ onMounted(() => {
       }
     }
 
-    const bgName = query.get("bg") ?? "DSS";
-
     store.gotoRADecZoom({
       ...cameraParams,
       instant: true
@@ -589,7 +588,18 @@ onMounted(() => {
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands"));
-      backgroundImagesetName.value = bgName;
+
+      const bgName = query.get("bg") ?? "DSS";
+      let backgroundName: string | null = null;
+      if (bgName) {
+        const bgSet = backgroundImagesets.find(bg => bg.displayName === bgName);
+        if (bgSet) {
+          backgroundName = bgSet.imagesetName; 
+        }
+      }
+      if (backgroundName) {
+        backgroundImagesetName.value = backgroundName;
+      }
     });
 
     // If there are layers to set up, do that here!
@@ -739,7 +749,12 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
 
 function shareURL(): string {
   const url = new URL(window.location.href);
-  url.search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}&bg=${backgroundImagesetName.value}`;  
+  const bgSet = backgroundImagesets.find(bg => bg.imagesetName === backgroundImagesetName.value);
+  let search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}`;
+  if (bgSet) {
+    search = `${search}&bg=${bgSet.displayName}`;
+  }
+  url.search = search;
   return url.href;
 }
 
