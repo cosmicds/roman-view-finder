@@ -568,7 +568,8 @@ onMounted(() => {
         cameraParams[name] = value;
       }
     }
-    console.log(cameraParams);
+
+    const bgName = query.get("bg") ?? "DSS";
 
     store.gotoRADecZoom({
       ...cameraParams,
@@ -588,6 +589,7 @@ onMounted(() => {
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands"));
+      backgroundImagesetName.value = bgName;
     });
 
     // If there are layers to set up, do that here!
@@ -737,7 +739,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
 
 function shareURL(): string {
   const url = new URL(window.location.href);
-  url.search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}`;  
+  url.search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}&bg=${backgroundImagesetName.value}`;  
   return url.href;
 }
 
