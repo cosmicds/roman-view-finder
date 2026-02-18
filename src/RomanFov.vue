@@ -558,22 +558,23 @@ onMounted(() => {
     const cameraParams = { ...props.initialCameraParams };
     const query = new URLSearchParams(window.location.search);
 
-    const paramNames: (keyof CameraParams)[] = ["raRad", "decRad", "zoomDeg", "rollRad"] as const;
-    for (const name of paramNames) {
-      const valueString = query.get(name);
+    const paramNames: Record<string, keyof CameraParams> = {
+      "raDeg": "raRad",
+      "decDeg": "decRad",
+      "zoomDeg": "zoomDeg",
+      "rollDeg": "rollRad",
+    };
+    for (const [queryParam, cameraParam] of Object.entries(paramNames)) {
+      const valueString = query.get(queryParam);
       if (valueString == null) {
         continue;
       }
       const value = parseFloat(valueString);
       if (!isNaN(value)) {
-        cameraParams[name] = value;
+        const factor = queryParam === "zoomDeg" ? 1 : D2R;
+        cameraParams[cameraParam] = value * factor;
       }
     }
-
-    store.gotoRADecZoom({
-      ...cameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
 
     // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -585,6 +586,12 @@ onMounted(() => {
         fillOpacity: fillOpacity.value,
       });
     };
+    WWTControl.singleton.renderOneFrame();
+
+    store.gotoRADecZoom({
+      ...cameraParams,
+      instant: true
+    }).then(() => positionSet.value = true);
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands"));
@@ -750,7 +757,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
 function shareURL(): string {
   const url = new URL(window.location.href);
   const bgSet = backgroundImagesets.find(bg => bg.imagesetName === backgroundImagesetName.value);
-  let search = `raRad=${store.raRad}&decRad=${store.decRad}&zoomDeg=${store.zoomDeg}&rollRad=${store.rollRad}`;
+  let search = `raDeg=${store.raRad*R2D}&decDeg=${store.decRad*R2D}&zoomDeg=${store.zoomDeg}&rollDeg=${store.rollRad*R2D}`;
   if (bgSet) {
     search = `${search}&bg=${bgSet.displayName}`;
   }
