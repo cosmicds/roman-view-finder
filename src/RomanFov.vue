@@ -609,6 +609,10 @@ onMounted(() => {
       }
     });
 
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState({}, document.title, url.toString());
+
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
   });
