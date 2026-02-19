@@ -155,6 +155,23 @@
           >
           </icon-button>          
         </div>
+        <div>
+          <icon-button
+            id="clipboard-icon"
+            fa-icon="fa-clipboard"
+            :color="borderColor"
+            tooltip-text="Copy share URL"
+            tooltip-location="start"
+            @activate="copyURLToClipboard"
+          >
+          </icon-button>
+          <v-snackbar
+            v-model="snackbar"
+            :color="snackbarColor"
+          >
+            {{ snackbarMessage }}
+          </v-snackbar>
+        </div>
       </div>
     </div>
 
@@ -449,6 +466,7 @@ const backgroundImagesetName = computed({
   }
 });
 
+
 useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
@@ -520,6 +538,10 @@ const fill = ref(false);
 const fillOpacity = ref(0.5);
 const moving = ref(false);
 
+const snackbar = ref(false);
+const snackbarColor = ref<"error" | "success">("success");
+const snackbarMessage = ref("");
+
 const settings = Settings.get_active();
 
 onMounted(() => {
@@ -533,10 +555,26 @@ onMounted(() => {
     control.renderOneFrame();
     control.renderOneFrame = renderOneFrame.bind(control);
 
-    store.gotoRADecZoom({
-      ...props.initialCameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
+    const cameraParams = { ...props.initialCameraParams };
+    const query = new URLSearchParams(window.location.search);
+
+    const paramNames: Record<string, keyof CameraParams> = {
+      "raDeg": "raRad",
+      "decDeg": "decRad",
+      "zoomDeg": "zoomDeg",
+      "rollDeg": "rollRad",
+    };
+    for (const [queryParam, cameraParam] of Object.entries(paramNames)) {
+      const valueString = query.get(queryParam);
+      if (valueString == null) {
+        continue;
+      }
+      const value = parseFloat(valueString);
+      if (!isNaN(value)) {
+        const factor = queryParam === "zoomDeg" ? 1 : D2R;
+        cameraParams[cameraParam] = value * factor;
+      }
+    }
 
     // control._drawCrosshairs = (_renderContext: RenderContext) => { drawFootprint(WWTControl.singleton); };
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -548,10 +586,32 @@ onMounted(() => {
         fillOpacity: fillOpacity.value,
       });
     };
+    WWTControl.singleton.renderOneFrame();
+
+    store.gotoRADecZoom({
+      ...cameraParams,
+      instant: true
+    }).then(() => positionSet.value = true);
 
     await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands"));
+
+      const bgName = query.get("bg") ?? "DSS";
+      let backgroundName: string | null = null;
+      if (bgName) {
+        const bgSet = backgroundImagesets.find(bg => bg.displayName === bgName);
+        if (bgSet) {
+          backgroundName = bgSet.imagesetName; 
+        }
+      }
+      if (backgroundName) {
+        backgroundImagesetName.value = backgroundName;
+      }
     });
+
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState({}, document.title, url.toString());
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
@@ -696,6 +756,31 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
   const multiple = invalid.length > 1;
   const isAre = multiple ? "are" : "is";
   positionSearchError.value = `Your value${multiple ? 's' : ''} for ${invalid.join(' and ')} ${isAre} invalid`;
+}
+
+function shareURL(): string {
+  const url = new URL(window.location.href);
+  const bgSet = backgroundImagesets.find(bg => bg.imagesetName === backgroundImagesetName.value);
+  let search = `raDeg=${store.raRad*R2D}&decDeg=${store.decRad*R2D}&zoomDeg=${store.zoomDeg}&rollDeg=${store.rollRad*R2D}`;
+  if (bgSet) {
+    search = `${search}&bg=${bgSet.displayName}`;
+  }
+  url.search = search;
+  return url.href;
+}
+
+function copyURLToClipboard() {
+  navigator.clipboard
+    .writeText(shareURL())
+    .then(() => {
+      snackbarColor.value = "success";
+      snackbarMessage.value = "Shareable URL copied to clipboard";
+    })
+    .catch((_err) => {
+      snackbarColor.value = "error";
+      snackbarMessage.value = "Failed to copy share URL to clipboard";
+    })
+    .finally(() => snackbar.value = true);
 }
 
 watch(galactic, (gal: boolean) => {

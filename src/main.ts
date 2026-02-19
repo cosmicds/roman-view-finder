@@ -13,6 +13,7 @@ import SimbadResolver from './SimbadResolver.vue';
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
+  faClipboard,
   faInfo,
   faChevronUp,
   faSliders,
@@ -21,6 +22,7 @@ import {
 
 import "@mdi/font/css/materialdesignicons.css";
 
+library.add(faClipboard);
 library.add(faInfo);
 library.add(faChevronUp);
 library.add(faSliders);
