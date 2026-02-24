@@ -61,8 +61,16 @@ const name = ref<string | null>(null);
 const details = ref<ResolvedObject | null>(null);
 const errorMessage = ref('');
 
-const resolver: 'sesame' | 'simbad' = 'simbad';
+const resolver: 'sesame' | 'simbad' | 'fallback' = 'fallback';
 const searching = ref(false);
+function simbadWithSesameFallback(name) {
+  return simbadNameResolver(name).catch(() => sesameNameResolver(name));
+}
+const resolvers = {
+  'sesame': sesameNameResolver,
+  'simbad': simbadNameResolver,
+  'fallback': simbadWithSesameFallback,
+};
 
 function goTo(object: ResolvedObject) {
   if (object?.raDeg && object?.decDeg) {
@@ -82,12 +90,11 @@ function resolveName() {
   errorMessage.value = '';
   if (name.value) {
     searching.value = true;
-    (resolver === 'simbad' ? simbadNameResolver: sesameNameResolver)(name.value)
+    (resolvers[resolver])(name.value)
       .then(d => {
         details.value = d;
         emits('resolved', d);
         searching.value = false;
-        console.log(d);
         if (props.goto) {
           goTo(d);
         }
