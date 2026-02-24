@@ -135,7 +135,7 @@ export async function simbadResolveCoordinates(raDeg, decDeg, radiusArcSec = 60,
  * @param name is the object name to resolve
  * Will return the oname (official name)
  */
-export async function simbadNameResolver(name) {
+export async function simbadId(name) {
   const simbadNameQueryUrl = 'https://simbad.cds.unistra.fr/simbad/sim-id';
   const params = new URLSearchParams({
     'Ident': name,
@@ -199,4 +199,61 @@ export async function simbadNameResolver(name) {
     throw new Error('Could not resolve name');
   }
   return out;
+}
+
+
+export interface SimbadNameResolverJSON {
+  dec?:            number;
+  coo_bibcode?:    string;
+  oid?:            number;
+  redshift?:       number;
+  dim_angle?:      number;
+  idlist?:         string[];
+  dim_minaxis?:    number;
+  radvel?:         number;
+  ra?:             number;
+  dim_majaxis?:    number;
+  otype?:          string;
+  mainId?:         string;
+  plx?:            number;
+}
+
+
+function parseSimbadJson(json: SimbadNameResolverJSON): ResolvedObject {
+  return {
+    raDeg: json.ra,
+    decDeg: json.dec,
+    oname: json.mainId,
+    size: Math.sqrt((json.dim_majaxis ?? 0)**2 + (json.dim_minaxis??0)**2) / 60, // in degrees
+    otype: json.otype,
+  };
+}
+
+export async function simbadNameResolver(name: string) {
+  const simbadNameResolverUrl = 'https://simbad.u-strasbg.fr/simbad/sim-nameresolver';
+  const params = new URLSearchParams({
+    ident: name,
+    output: 'json',
+    option: 'strict',
+  });
+  const url = simbadNameResolverUrl + '?' + params.toString();
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    let out: ResolvedObject = {};
+    if (Array.isArray(json) && json.length > 0) {
+      out = parseSimbadJson(json[0]);
+    } else {
+      out = parseSimbadJson(json);
+    }
+    if (!out.oname || !out.raDeg || !out.decDeg) {
+      console.error(`The name is bad ${out.oname}`);
+      throw new Error('Could not resolve name');
+    }
+    return out;
+  } catch (e) {
+    console.error(e);
+    throw new Error('Could not resolve name');
+  }
+
 }
