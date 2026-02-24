@@ -16,11 +16,29 @@
     autocorrect="off"
   >     
   </v-text-field>
+  <v-btn
+    @click="() => resolveName()"
+    :loading="searching"
+    :color="buttonColor"
+    text="Search"
+    type="Submit"
+    density="comfortable"
+    class="mt-1"
+  ></v-btn>
 </div>
 </template>
+<style lang="css">
+#simbad-resolver {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+}
+</style>
 <script lang="ts" setup>
 import {ref} from 'vue';
-import { simbadNameResolver, ResolvedObject } from './simbad_resolvers';
+import { simbadNameResolver, ResolvedObject} from './simbad_resolvers';
 import { sesameNameResolver } from './sesame_resolver';
 import { engineStore } from '@wwtelescope/engine-pinia';
 import { D2R } from "@wwtelescope/astro";
@@ -28,9 +46,11 @@ import { D2R } from "@wwtelescope/astro";
 const store = engineStore();
 
 interface SesameResolverComonentProps {
-  goto?: boolean
+  goto?: boolean,
+  button?: boolean,
+  buttonColor?: string
 }
-const props = withDefaults(defineProps<SesameResolverComonentProps>(),{goto: false});
+const props = withDefaults(defineProps<SesameResolverComonentProps>(),{goto: false, button: false, buttonColor: 'on-surface'});
 
 const emits = defineEmits<{
   resolved: [value: ResolvedObject]
@@ -42,6 +62,7 @@ const details = ref<ResolvedObject | null>(null);
 const errorMessage = ref('');
 
 const resolver: 'sesame' | 'simbad' = 'simbad';
+const searching = ref(false);
 
 function goTo(object: ResolvedObject) {
   if (object?.raDeg && object?.decDeg) {
@@ -60,10 +81,12 @@ function resolveName() {
   console.log(`resolving ${name.value}`);
   errorMessage.value = '';
   if (name.value) {
+    searching.value = true;
     (resolver === 'simbad' ? simbadNameResolver: sesameNameResolver)(name.value)
       .then(d => {
         details.value = d;
         emits('resolved', d);
+        searching.value = false;
         console.log(d);
         if (props.goto) {
           goTo(d);
@@ -71,6 +94,7 @@ function resolveName() {
       })
       .catch((e) => {
         console.log(e);
+        searching.value = false;
         errorMessage.value = 'Could not find object';
       });
   }
