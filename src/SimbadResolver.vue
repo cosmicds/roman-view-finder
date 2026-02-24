@@ -13,6 +13,7 @@
     hint="Press [Enter] to search"
     @keyup.enter="resolveName"
     @keydown.stop
+    autocorrect="off"
   >     
   </v-text-field>
 </div>
