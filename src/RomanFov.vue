@@ -232,6 +232,40 @@
       <credit-logos/>
     </div>
 
+
+    <v-dialog
+      v-model="showInfoDialog"
+      persistent
+      :scrim="false"
+      id="info-dialog"
+      content-class="info-dialog-content"
+    >
+      <font-awesome-icon
+        id="info-close-icon"
+        class="close-icon"
+        icon="times"
+        size="lg"
+        @click="showInfoDialog = false"
+        @keyup.enter="showInfoDialog = false"
+        tabindex="0"
+      >
+      </font-awesome-icon>
+      <p>Informational content goes here!</p>
+      <p>e.g.</p>
+      <p>Use <code>Ctrl</code> to rotate the view!</p>
+
+      <v-card-actions>
+        <v-btn
+          @click="() => {
+            autoOpenInfoDialog = false;
+            showInfoDialog = false;
+          }"
+        >
+          Don't show again
+        </v-btn>
+      </v-card-actions>
+    </v-dialog>
+
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
       <v-dialog id="video-container" v-model="showVideoSheet" transition="slide-y-transition" fullscreen>
@@ -423,7 +457,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, watch, onBeforeMount, onMounted, nextTick, type Ref } from "vue";
 import { fmtDegLat, fmtHours, D2R, R2D } from "@wwtelescope/astro";
 import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -542,7 +576,16 @@ const snackbar = ref(false);
 const snackbarColor = ref<"error" | "success">("success");
 const snackbarMessage = ref("");
 
+const showInfoDialog = ref(false);
+const autoOpenInfoDialog = ref(true);
+
 const settings = Settings.get_active();
+
+const AUTO_SHOW_INFO_KEY = "roman-view-finder__auto-show-info";
+onBeforeMount(() => {
+  console.log(window.localStorage.getItem(AUTO_SHOW_INFO_KEY));
+  autoOpenInfoDialog.value = window.localStorage.getItem(AUTO_SHOW_INFO_KEY)?.toLowerCase() !== "false";
+});
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -615,6 +658,8 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
+
+    showInfoDialog.value = autoOpenInfoDialog.value;
   });
 });
 
@@ -823,6 +868,9 @@ function handleResolved(object: ResolvedObject) {
 //    */
 // }
 
+watch(autoOpenInfoDialog, (open: boolean) => {
+  window.localStorage.setItem(AUTO_SHOW_INFO_KEY, open.toString());
+});
 </script>
 
 <style lang="less">
@@ -1057,6 +1105,22 @@ video {
   z-index: 10;
 }
 
+.close-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 15;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:focus {
+    color: white;
+    border: 2px solid white;
+  }
+}
+
 .info-sheet {
   .v-overlay__content {
     align-self: flex-end;
@@ -1124,22 +1188,6 @@ video {
     padding-right: 0.5em;
   }
 
-  .close-icon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 15;
-
-    &:hover {
-      cursor: pointer;
-    }
-
-    &:focus {
-      color: white;
-      border: 2px solid white;
-    }
-  }
-
   .scrollable {
     overflow-y: auto;
   }
@@ -1165,6 +1213,10 @@ video {
     top: 0.25em;
     right: calc((3em - 0.6875em) / 3); // font-awesome-icons have width 0.6875em
     color: white;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   // This prevents the tabs from having some extra space to the left when the screen is small
@@ -1275,7 +1327,20 @@ video {
   input[type="checkbox"] {
     color: var(--border-color);
   }
+}
 
-  
+#info-dialog .info-dialog-content {
+  width: 350px;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid white;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 10px;
+
+  .close-icon {
+    top: 5px;
+  }
 }
 </style>
