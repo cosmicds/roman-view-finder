@@ -17,6 +17,7 @@
   >     
   </v-text-field>
   <v-btn
+    v-if="button"
     @click="() => resolveName()"
     :loading="searching"
     :color="buttonColor"
