@@ -282,21 +282,19 @@
               Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
           </v-list-item>
         </ul>
+        <v-card-actions>
+          <v-btn
+            variant="text"
+            :color="accentColor"
+            @click="() => {
+              autoOpenInfoDialog = false;
+              showInfoDialog = false;
+            }"
+          >
+            Don't show again
+          </v-btn>
+        </v-card-actions>
       </div>
-
-      <v-card-actions>
-        <v-btn
-          class="mt-2 mb-1"
-          variant="text"
-          :color="accentColor"
-          @click="() => {
-            autoOpenInfoDialog = false;
-            showInfoDialog = false;
-          }"
-        >
-          Don't show again
-        </v-btn>
-      </v-card-actions>
     </v-dialog>
 
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
@@ -1173,8 +1171,6 @@ video {
 }
 
 .info-text {
-  height: var(--info-text-height);
-  padding-bottom: 25px;
 
   p {
     margin-block: 0.5em;
@@ -1213,6 +1209,11 @@ video {
 
 
 .info-sheet {
+
+  .info-text {
+    height: var(--info-text-height);
+  }
+
   .v-overlay__content {
     align-self: flex-end;
     padding: 0;
@@ -1381,7 +1382,10 @@ video {
 }
 
 #info-dialog .info-dialog-content {
-  width: 350px;
+  width: auto;
+  max-width: min(350px, calc(100vw - 2rem));
+  max-height: calc(95vh - 1rem);
+  overflow-y: auto;
   position: absolute;
   right: 1rem;
   bottom: 20%;
