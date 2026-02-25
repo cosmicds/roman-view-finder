@@ -157,8 +157,8 @@
         </div>
         <div>
           <icon-button
-            id="clipboard-icon"
-            fa-icon="fa-clipboard"
+            id="share-icon"
+            fa-icon="fa-share-nodes"
             :color="borderColor"
             tooltip-text="Copy share URL"
             tooltip-location="start"
@@ -235,6 +235,7 @@
 
     <v-dialog
       v-model="showInfoDialog"
+      :style="cssVars"
       persistent
       :scrim="false"
       id="info-dialog"
@@ -250,12 +251,44 @@
         tabindex="0"
       >
       </font-awesome-icon>
-      <p>Informational content goes here!</p>
-      <p>e.g.</p>
-      <p>Use <code>Ctrl</code> to rotate the view!</p>
+      <div class="intro-card info-text">
+        <h3 class="mb-3">
+          Quick Start
+        </h3>
+        <h4>Navigation</h4>
+        <ul class="ml-4">
+          <v-list-item>
+            <strong>Pan:</strong> Click + drag.
+          </v-list-item>
+          <v-list-item>
+            <strong>Zoom:</strong> Scroll in and out
+          </v-list-item>
+          <v-list-item>
+            <strong>Rotate:</strong> Press <strong>ctrl</strong> + click + drag
+          </v-list-item>
+        </ul>
+        <h4 class="mt-2">Buttons</h4>
+        <ul>
+          <v-list-item>
+            <template v-slot:prepend>
+              <font-awesome-icon icon="info" size="xl" class="bullet-icon"></font-awesome-icon>
+            </template>
+              View all documentation
+          </v-list-item>
+          <v-list-item>
+            <template v-slot:prepend>
+              <font-awesome-icon icon="share-nodes" size="xl" class="bullet-icon"></font-awesome-icon>
+            </template>
+              Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
+          </v-list-item>
+        </ul>
+      </div>
 
       <v-card-actions>
         <v-btn
+          class="mt-2 mb-1"
+          variant="text"
+          :color="accentColor"
           @click="() => {
             autoOpenInfoDialog = false;
             showInfoDialog = false;
@@ -392,6 +425,22 @@
                         </li>   
                         <li>
                           <strong>Galactic mode</strong>: rotate WWT view to follow galactic plane.
+                        </li>
+                        <li>
+                          <font-awesome-icon
+                              class="bullet-icon"
+                              icon="info"
+                              size="lg" 
+                            ></font-awesome-icon>
+                            View this documentation
+                        </li>
+                        <li>
+                          <font-awesome-icon
+                              class="bullet-icon"
+                              icon="share-nodes"
+                              size="lg" 
+                            ></font-awesome-icon>
+                            Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
                         </li>       
                       </ul>
                     </v-col>
@@ -411,14 +460,6 @@
                           <strong>Dec</strong>: Declination can be entered in sexagesimal format (00&deg;00'00", 00:00:00, or 00 00 00) or in decimal format.
                         </li>                                 
                       </ul>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12">
-                      <h4 class="user-guide-header">Coming Soon</h4>
-                      <p>
-                        <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
-                      </p>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -1063,6 +1104,12 @@ body {
   box-shadow: none !important;
 }
 
+// Remove oreo focus styling from info dialog
+#info-dialog .info-dialog-content:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .video-wrapper {
   height: 100%;
   background: black;
@@ -1121,6 +1168,50 @@ video {
   }
 }
 
+.intro-card {
+  padding: 1em;
+}
+
+.info-text {
+  height: var(--info-text-height);
+  padding-bottom: 25px;
+
+  p {
+    margin-block: 0.5em;
+  }
+
+  a {
+    color: var(--accent-color-2)
+  }
+
+  h3 {
+    font-size: 1.4em;
+    color: var(--text-color);
+  }
+
+  h4 {
+    font-size: 1.2em;
+    color: var(--border-color);
+  }
+
+  h5 {
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 1em;
+  }
+
+  li {
+    margin-block: 0.5em;
+  }
+}
+
+.bullet-icon {
+  color: var(--border-color);
+  width: 1.2em;
+  padding-right: 0.5em;
+}
+
+
 .info-sheet {
   .v-overlay__content {
     align-self: flex-end;
@@ -1141,51 +1232,11 @@ video {
     & .v-card .v-window {
       height: 100%;
     }
-
-    & .info-tabs h3 {
-      font-size: 1.2em;
-      color: var(--border-color);
-    }
   }
 
   #tabs {
     width: calc(100% - 3em);
     align-self: left;
-  }
-
-  .info-text {
-    height: var(--info-text-height);
-    padding-bottom: 25px;
-
-    p {
-      margin-block: 0.5em;
-    }
-
-    a {
-      color: var(--accent-color-2)
-    }
-
-
-    h4 {
-      font-size: 1.2em;
-      color: var(--border-color);
-    }
-
-    h5 {
-      font-size: 1em;
-      font-weight: bold;
-      margin-top: 1em;
-    }
-
-    li {
-      margin-block: 0.5em;
-    }
-  }
-
-  .bullet-icon {
-    color: var(--border-color);
-    width: 1.6em;
-    padding-right: 0.5em;
   }
 
   .scrollable {
@@ -1332,15 +1383,15 @@ video {
 #info-dialog .info-dialog-content {
   width: 350px;
   position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 1px solid white;
+  right: 1rem;
+  bottom: 20%;
+  border: 1px solid var(--accent-color);
   background: rgb(var(--v-theme-surface));
   border-radius: 10px;
 
   .close-icon {
-    top: 5px;
+    top: 10px;
+    right: 10px;
   }
 }
 </style>
