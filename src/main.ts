@@ -22,7 +22,7 @@ import {
 
 import "@mdi/font/css/materialdesignicons.css";
 
-library.add(faShareNodes)
+library.add(faShareNodes);
 library.add(faInfo);
 library.add(faChevronUp);
 library.add(faSliders);
