@@ -309,7 +309,7 @@
         >
           <template #text>
             <p>
-              This app requires WebGL2 to run.
+              This app requires WebGL2 to run. You may need to enable graphics acceleration.
               You can check whether your browser supports WebGL2
               and get assistance <a href="https://get.webgl.org/webgl2/" target="_blank" rel="noopener noreferrer">here</a>.
             </p>
