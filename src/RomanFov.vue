@@ -297,7 +297,28 @@
       </div>
     </v-dialog>
 
-      <!-- This dialog contains the video that is displayed when the video icon is clicked -->
+    <!-- WebGL2 not enabled dialog --> 
+    <v-dialog
+      v-model="showWebGL2Dialog"
+      persistent
+    >
+      <v-card>
+        <v-alert
+          type="error"
+          variant="tonal"
+        >
+          <template #text>
+            <p>
+              This app requires WebGL2 to run.
+              You can check whether your browser supports WebGL2
+              and get assistance <a href="https://get.webgl.org/webgl2/" target="_blank" rel="noopener noreferrer">here</a>.
+            </p>
+          </template>
+        </v-alert>
+      </v-card>
+    </v-dialog>
+
+    <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
       <v-dialog id="video-container" v-model="showVideoSheet" transition="slide-y-transition" fullscreen>
         <div class="video-wrapper">
@@ -619,13 +640,36 @@ const autoOpenInfoDialog = ref(true);
 
 const settings = Settings.get_active();
 
+const showWebGL2Dialog = ref(false);
+
+function isWebGL2Enabled() {
+  // It doesn't seem like there's a better way to do this than just to try and get a context
+  // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/By_example/Detect_WebGL
+  // NB: The engine specifically wants a webgl2 context
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl2");
+  return gl instanceof WebGL2RenderingContext;
+}
+
 const AUTO_SHOW_INFO_KEY = "roman-view-finder__auto-show-info";
 onBeforeMount(() => {
   autoOpenInfoDialog.value = window.localStorage.getItem(AUTO_SHOW_INFO_KEY)?.toLowerCase() !== "false";
 });
 
 onMounted(() => {
+
   store.waitForReady().then(async () => {
+
+    if (!isWebGL2Enabled()) {
+      showWebGL2Dialog.value = true; 
+      layersLoaded.value = true;
+      positionSet.value = true;
+      // eslint-disable-next-lint @typescript-eslint/ban-ts-comment
+      // @ts-expect-error `canvas` is defined
+      WWTControl.singleton.canvas.setAttribute("hidden", "true");
+      WWTControl.singleton.renderOneFrame = function() {};
+      return;
+    }
 
     settings.set_galacticMode(galactic.value);
     settings.set_showCrosshairs(crosshairs.value);
