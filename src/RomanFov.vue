@@ -157,8 +157,8 @@
         </div>
         <div>
           <icon-button
-            id="clipboard-icon"
-            fa-icon="fa-clipboard"
+            id="share-icon"
+            fa-icon="fa-share-nodes"
             :color="borderColor"
             tooltip-text="Copy share URL"
             tooltip-location="start"
@@ -231,6 +231,71 @@
     <div id="body-logos" v-if= "!smallSize">
       <credit-logos/>
     </div>
+
+
+    <v-dialog
+      v-model="showInfoDialog"
+      :style="cssVars"
+      persistent
+      :scrim="false"
+      id="info-dialog"
+      content-class="info-dialog-content"
+    >
+      <font-awesome-icon
+        id="info-close-icon"
+        class="close-icon"
+        icon="times"
+        size="lg"
+        @click="showInfoDialog = false"
+        @keyup.enter="showInfoDialog = false"
+        tabindex="0"
+      >
+      </font-awesome-icon>
+      <div class="intro-card info-text">
+        <h3 class="mb-3">
+          Quick Start
+        </h3>
+        <h4>Navigation</h4>
+        <ul class="ml-4">
+          <v-list-item density="compact">
+            <strong>Pan:</strong> Click + drag.
+          </v-list-item>
+          <v-list-item density="compact">
+            <strong>Zoom:</strong> Scroll in and out
+          </v-list-item>
+          <v-list-item density="compact">
+            <strong>Rotate:</strong> Press <strong>ctrl</strong> + click + drag
+          </v-list-item>
+        </ul>
+        <h4 class="mt-2">Buttons</h4>
+        <ul>
+          <v-list-item density="compact">
+            <template v-slot:prepend>
+              <font-awesome-icon icon="info" size="lg" class="bullet-icon"></font-awesome-icon>
+            </template>
+              View all documentation
+          </v-list-item>
+          <v-list-item density="compact">
+            <template v-slot:prepend>
+              <font-awesome-icon icon="share-nodes" size="lg" class="bullet-icon"></font-awesome-icon>
+            </template>
+              Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
+          </v-list-item>
+        </ul>
+        <v-card-actions class="pb-0">
+          <v-btn
+            variant="text"
+            :color="accentColor"
+            @click="() => {
+              autoOpenInfoDialog = false;
+              showInfoDialog = false;
+            }"
+          >
+            Don't show again
+          </v-btn>
+        </v-card-actions>
+      </div>
+    </v-dialog>
 
       <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -358,6 +423,22 @@
                         </li>   
                         <li>
                           <strong>Galactic mode</strong>: rotate WWT view to follow galactic plane.
+                        </li>
+                        <li>
+                          <font-awesome-icon
+                              class="bullet-icon"
+                              icon="info"
+                              size="lg" 
+                            ></font-awesome-icon>
+                            View this documentation
+                        </li>
+                        <li>
+                          <font-awesome-icon
+                              class="bullet-icon"
+                              icon="share-nodes"
+                              size="lg" 
+                            ></font-awesome-icon>
+                            Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
                         </li>       
                       </ul>
                     </v-col>
@@ -377,14 +458,6 @@
                           <strong>Dec</strong>: Declination can be entered in sexagesimal format (00&deg;00'00", 00:00:00, or 00 00 00) or in decimal format.
                         </li>                                 
                       </ul>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12">
-                      <h4 class="user-guide-header">Coming Soon</h4>
-                      <p>
-                        <strong>Dithering</strong>: Overlay multiple footprints with offsets and rotations
-                      </p>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -423,7 +496,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, watch, onBeforeMount, onMounted, nextTick, type Ref } from "vue";
 import { fmtDegLat, fmtHours, D2R, R2D } from "@wwtelescope/astro";
 import { Color, Coordinates, Settings, WWTControl } from "@wwtelescope/engine";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -542,7 +615,16 @@ const snackbar = ref(false);
 const snackbarColor = ref<"error" | "success">("success");
 const snackbarMessage = ref("");
 
+const showInfoDialog = ref(false);
+const autoOpenInfoDialog = ref(true);
+
 const settings = Settings.get_active();
+
+const AUTO_SHOW_INFO_KEY = "roman-view-finder__auto-show-info";
+onBeforeMount(() => {
+  console.log(window.localStorage.getItem(AUTO_SHOW_INFO_KEY));
+  autoOpenInfoDialog.value = window.localStorage.getItem(AUTO_SHOW_INFO_KEY)?.toLowerCase() !== "false";
+});
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -615,6 +697,8 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
+
+    showInfoDialog.value = autoOpenInfoDialog.value;
   });
 });
 
@@ -653,7 +737,7 @@ const cssVars = computed(() => {
   };
 });
 
-const showOptions = ref(true);
+const showOptions = ref(!smAndDown.value);
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just
@@ -823,6 +907,9 @@ function handleResolved(object: ResolvedObject) {
 //    */
 // }
 
+watch(autoOpenInfoDialog, (open: boolean) => {
+  window.localStorage.setItem(AUTO_SHOW_INFO_KEY, open.toString());
+});
 </script>
 
 <style lang="less">
@@ -1015,6 +1102,12 @@ body {
   box-shadow: none !important;
 }
 
+// Remove oreo focus styling from info dialog
+#info-dialog .info-dialog-content:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .video-wrapper {
   height: 100%;
   background: black;
@@ -1057,7 +1150,70 @@ video {
   z-index: 10;
 }
 
+.close-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 15;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:focus {
+    color: white;
+    border: 2px solid white;
+  }
+}
+
+.intro-card {
+  padding: 1em;
+}
+
+.info-text {
+
+  p {
+    margin-block: 0.5em;
+  }
+
+  a {
+    color: var(--accent-color-2)
+  }
+
+  h3 {
+    font-size: 1.4em;
+    color: var(--text-color);
+  }
+
+  h4 {
+    font-size: 1.2em;
+    color: var(--border-color);
+  }
+
+  h5 {
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 1em;
+  }
+
+  li {
+    margin-block: 0.5em;
+  }
+}
+
+.bullet-icon {
+  color: var(--border-color);
+  width: 1.2em;
+  padding-right: 0.5em;
+}
+
+
 .info-sheet {
+
+  .info-text {
+    height: var(--info-text-height);
+  }
+
   .v-overlay__content {
     align-self: flex-end;
     padding: 0;
@@ -1077,67 +1233,11 @@ video {
     & .v-card .v-window {
       height: 100%;
     }
-
-    & .info-tabs h3 {
-      font-size: 1.2em;
-      color: var(--border-color);
-    }
   }
 
   #tabs {
     width: calc(100% - 3em);
     align-self: left;
-  }
-
-  .info-text {
-    height: var(--info-text-height);
-    padding-bottom: 25px;
-
-    p {
-      margin-block: 0.5em;
-    }
-
-    a {
-      color: var(--accent-color-2)
-    }
-
-
-    h4 {
-      font-size: 1.2em;
-      color: var(--border-color);
-    }
-
-    h5 {
-      font-size: 1em;
-      font-weight: bold;
-      margin-top: 1em;
-    }
-
-    li {
-      margin-block: 0.5em;
-    }
-  }
-
-  .bullet-icon {
-    color: var(--border-color);
-    width: 1.6em;
-    padding-right: 0.5em;
-  }
-
-  .close-icon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 15;
-
-    &:hover {
-      cursor: pointer;
-    }
-
-    &:focus {
-      color: white;
-      border: 2px solid white;
-    }
   }
 
   .scrollable {
@@ -1165,6 +1265,10 @@ video {
     top: 0.25em;
     right: calc((3em - 0.6875em) / 3); // font-awesome-icons have width 0.6875em
     color: white;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   // This prevents the tabs from having some extra space to the left when the screen is small
@@ -1275,7 +1379,24 @@ video {
   input[type="checkbox"] {
     color: var(--border-color);
   }
+}
 
-  
+#info-dialog .info-dialog-content {
+  width: auto;
+  max-width: min(300px, calc(100vw - 2rem));
+  max-height: calc(95vh - 1rem);
+  overflow-y: auto;
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  margin: 0 !important;
+  border: 1px solid var(--border-color);
+  background: rgb(var(--v-theme-surface));
+  border-radius: 10px;
+
+  .close-icon {
+    top: 10px;
+    right: 10px;
+  }
 }
 </style>
