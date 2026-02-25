@@ -737,7 +737,7 @@ const cssVars = computed(() => {
   };
 });
 
-const showOptions = ref(true);
+const showOptions = ref(!smAndDown.value);
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just
