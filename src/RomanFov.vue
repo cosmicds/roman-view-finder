@@ -621,7 +621,6 @@ const settings = Settings.get_active();
 
 const AUTO_SHOW_INFO_KEY = "roman-view-finder__auto-show-info";
 onBeforeMount(() => {
-  console.log(window.localStorage.getItem(AUTO_SHOW_INFO_KEY));
   autoOpenInfoDialog.value = window.localStorage.getItem(AUTO_SHOW_INFO_KEY)?.toLowerCase() !== "false";
 });
 
