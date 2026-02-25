@@ -299,22 +299,24 @@
 
     <!-- WebGL2 not enabled dialog --> 
     <v-dialog
+      class="error-dialog"
+      :style="cssVars"
       v-model="showWebGL2Dialog"
       persistent
     >
       <v-card>
-        <v-alert
-          type="error"
-          variant="tonal"
-        >
-          <template #text>
-            <p>
-              This app requires WebGL2 to run. You may need to enable graphics acceleration.
-              You can check whether your browser supports WebGL2
-              and get assistance <a href="https://get.webgl.org/webgl2/" target="_blank" rel="noopener noreferrer">here</a>.
-            </p>
-          </template>
-        </v-alert>
+        <div class="error-message">
+          <p>
+            <strong>This app requires WebGL2</strong> 
+          </p>
+          <p class="mt-2">
+            Check your browser's settings and  enable webgl (or "graphics acceleration" on some browsers).
+          </p> 
+          <p class="mt-2">
+            You can check whether your browser supports WebGL2
+            and get assistance <a href="https://get.webgl.org/webgl2/" target="_blank" rel="noopener noreferrer">here</a>.
+          </p> 
+        </div>
       </v-card>
     </v-dialog>
 
@@ -1146,7 +1148,7 @@ body {
 }
 
 // Remove oreo focus styling from info dialog
-#info-dialog .info-dialog-content:focus-visible {
+#info-dialog .info-dialog-content:focus-visible, .error-dialog .v-overlay__content:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -1442,4 +1444,19 @@ video {
     right: 10px;
   }
 }
+
+.error-dialog {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  border-radius: 10px;
+}
+
+.error-message {
+  padding: 1rem;
+  border: 1px solid var(--accent-color);
+  text-align: center;
+  border-radius: 10px;
+}
+
 </style>
