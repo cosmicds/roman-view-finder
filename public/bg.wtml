@@ -4,5 +4,11 @@
         <Credits>IPAC/NASA - D. Lang for the reprocessing</Credits>
         <ThumbnailUrl>https://alasky.u-strasbg.fr/unWISE/color-W2-W1W2-W1/preview.jpg</ThumbnailUrl>
       </ImageSet>
+      <ImageSet BandPass="Visible" BaseDegreesPerTile="180.0" BaseTileLevel="0" BottomsUp="False" CenterX="0.0" CenterY="0.0" DataSetType="Sky" ElevationModel="False" FileType="jpeg" Generic="False" MeanRadius="1.0" MSRCommunityId="0" MSRComponentId="0" Name="SDSS9 color" OffsetX="0.0" OffsetY="0.0" Permission="0" Projection="Healpix" QuadTreeMap="0123" ReferenceFrame="Sky" Rotation="0.0" Sparse="True" StockSet="False" TileLevels="10" Url="https://alasky.u-strasbg.fr/SDSS/DR9/color/Norder{0}/Dir{1}/Npix{2}" WidthFactor="1">
+        <Credits>SLOAN Digitized Sky Survey - Healpixed by CDS</Credits>
+        <CreditsUrl>http://www.sdss.org/</CreditsUrl>
+        <Description>HiPS List ID: CDS/P/SDSS9/color</Description>
+        <ThumbnailUrl>http://alasky.u-strasbg.fr/SDSS/DR9/color/preview.jpg</ThumbnailUrl>
+      </ImageSet>
 </Folder>
 

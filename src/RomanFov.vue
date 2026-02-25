@@ -559,7 +559,6 @@ const props = withDefaults(defineProps<RomanFovProps>(), {
 const backgroundImagesets = reactive<BackgroundImageset[]>([
   new BackgroundImageset("DSS", "Digitized Sky Survey (Color)"),
   new BackgroundImageset("2MASS", "2Mass: Imagery (Infrared)"),
-  new BackgroundImageset("SDSS", "SDSS: Sloan Digital Sky Survey (Optical) [DR7]"),
 ]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
@@ -675,8 +674,9 @@ onMounted(() => {
       instant: true
     }).then(() => positionSet.value = true);
 
-    await store.loadImageCollection({ url: "unwise.wtml", loadChildFolders: false }).then(_folder => {
+    await store.loadImageCollection({ url: "bg.wtml", loadChildFolders: false }).then(_folder => {
       backgroundImagesets.push(new BackgroundImageset("unWISE", "unWISE color, from W2 and W1 bands"));
+      backgroundImagesets.push(new BackgroundImageset("SDSS", "SDSS9 color"));
 
       const bgName = query.get("bg") ?? "DSS";
       let backgroundName: string | null = null;
