@@ -257,32 +257,32 @@
         </h3>
         <h4>Navigation</h4>
         <ul class="ml-4">
-          <v-list-item>
+          <v-list-item density="compact">
             <strong>Pan:</strong> Click + drag.
           </v-list-item>
-          <v-list-item>
+          <v-list-item density="compact">
             <strong>Zoom:</strong> Scroll in and out
           </v-list-item>
-          <v-list-item>
+          <v-list-item density="compact">
             <strong>Rotate:</strong> Press <strong>ctrl</strong> + click + drag
           </v-list-item>
         </ul>
         <h4 class="mt-2">Buttons</h4>
         <ul>
-          <v-list-item>
+          <v-list-item density="compact">
             <template v-slot:prepend>
-              <font-awesome-icon icon="info" size="xl" class="bullet-icon"></font-awesome-icon>
+              <font-awesome-icon icon="info" size="lg" class="bullet-icon"></font-awesome-icon>
             </template>
               View all documentation
           </v-list-item>
-          <v-list-item>
+          <v-list-item density="compact">
             <template v-slot:prepend>
-              <font-awesome-icon icon="share-nodes" size="xl" class="bullet-icon"></font-awesome-icon>
+              <font-awesome-icon icon="share-nodes" size="lg" class="bullet-icon"></font-awesome-icon>
             </template>
               Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
           </v-list-item>
         </ul>
-        <v-card-actions>
+        <v-card-actions class="pb-0">
           <v-btn
             variant="text"
             :color="accentColor"
@@ -1383,13 +1383,14 @@ video {
 
 #info-dialog .info-dialog-content {
   width: auto;
-  max-width: min(350px, calc(100vw - 2rem));
+  max-width: min(300px, calc(100vw - 2rem));
   max-height: calc(95vh - 1rem);
   overflow-y: auto;
   position: absolute;
-  right: 1rem;
-  bottom: 20%;
-  border: 1px solid var(--accent-color);
+  left: 1rem;
+  top: 1rem;
+  margin: 0 !important;
+  border: 1px solid var(--border-color);
   background: rgb(var(--v-theme-surface));
   border-radius: 10px;
 
