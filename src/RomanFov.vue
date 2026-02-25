@@ -279,7 +279,7 @@
             <template v-slot:prepend>
               <font-awesome-icon icon="share-nodes" size="lg" class="bullet-icon"></font-awesome-icon>
             </template>
-              Get link to share current view. Url will be copied to clipboard and can be pasted in browser.
+              <strong>Share</strong> current view. Url will be copied to clipboard and can be pasted in browser.
           </v-list-item>
         </ul>
         <v-card-actions class="pb-0">
