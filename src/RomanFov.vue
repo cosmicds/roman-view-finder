@@ -690,7 +690,8 @@ onMounted(() => {
       "zoomDeg": "zoomDeg",
       "rollDeg": "rollRad",
     };
-    for (const [queryParam, cameraParam] of Object.entries(paramNames)) {
+    for (const queryParam of Object.keys(paramNames)) {
+      const cameraParam = paramNames[queryParam];
       const valueString = query.get(queryParam);
       if (valueString == null) {
         continue;
@@ -842,13 +843,14 @@ function handlePositionGoToClick(isActive: Ref<boolean>) {
 }
 
 function parseRA(data: string): number {
-  const lower = data.toLowerCase();
+  const lower = data.trim().toLowerCase();
   let hours = false;
-  if (['h', ':', ' '].some(c => lower.indexOf(c))) {
-    hours = true;
+  if (['h', ':', ' '].some(c => lower.indexOf(c) !== -1)) {
+    hours = lower.indexOf('d') === -1; // a d means there was degrees in there
   }
+  
   let ra = Coordinates.parse(lower);
-  if (hours) {
+  if (hours && ra <= 24) {
     ra *= 15;
   }
   return ra;
@@ -858,7 +860,7 @@ function tryGoToSearchPosition(menuOpen: Ref<boolean>, instant: boolean = false)
   positionSearchError.value = null;
 
   const ra = parseRA(positionSearchRA.value ?? "");
-  const dec = Coordinates.parseDec(positionSearchDec.value);
+  const dec = Coordinates.parseDec(positionSearchDec.value ?? "");
 
   const raValid = !isNaN(ra);
   const decValid = !isNaN(dec);
@@ -904,12 +906,13 @@ function copyURLToClipboard() {
     .then(() => {
       snackbarColor.value = "success";
       snackbarMessage.value = "Shareable URL copied to clipboard";
+      snackbar.value = true;
     })
     .catch((_err) => {
       snackbarColor.value = "error";
       snackbarMessage.value = "Failed to copy share URL to clipboard";
-    })
-    .finally(() => snackbar.value = true);
+      snackbar.value = true;
+    });
 }
 
 watch(galactic, (gal: boolean) => {
@@ -931,8 +934,8 @@ function handleResolved(object: ResolvedObject) {
   const {raDeg, decDeg}  = object;
   console.log('Received', object);
   if (raDeg && decDeg) {
-    positionSearchRA.value = `${raDeg / 15}`;
-    positionSearchDec.value = `${decDeg}`;
+    positionSearchRA.value = `${raDeg.toFixed(7)}d`;
+    positionSearchDec.value = `${decDeg.toFixed(7)}d`;
   }
   handlePositionGoToClick(ref(true));
 }

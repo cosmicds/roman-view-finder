@@ -24,9 +24,9 @@ declare module "@wwtelescope/engine" {
 
   interface Vector3d {}
 
-  namespace Vector3d {
-    function create(x: number, y: number, z: number): Vector3d;
-  }
+  // namespace Vector3d {
+  //   function create(x: number, y: number, z: number): Vector3d;
+  // }
 
   interface SimpleLineList {
     pure2D: boolean;
